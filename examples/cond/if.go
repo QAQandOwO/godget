@@ -6,14 +6,13 @@ import (
 )
 
 func ExampleIfThen() {
-	// These examples are equivalent to:
-	//
-	//    num := 10
-	//    if num > 0 {
-	//	     fmt.Println(num, "is positive")
-	//    }
-
 	num := 10
+
+	// These examples are equivalent to:
+	if num > 0 {
+		fmt.Println(num, "is positive")
+	}
+
 	// first way
 	cond.If(num > 0).Then(func(cond.IfCtx) {
 		fmt.Println(num, "is positive")
@@ -25,16 +24,15 @@ func ExampleIfThen() {
 }
 
 func ExampleIfThenElse() {
-	// These examples are equivalent to:
-	//
-	//    num := 10
-	//    if num > 0 {
-	//	     fmt.Println(num, "is positive")
-	//    } else {
-	//	     fmt.Println(num, "is non-positive")
-	//    }
-
 	num := 10
+
+	// These examples are equivalent to:
+	if num > 0 {
+		fmt.Println(num, "is positive")
+	} else {
+		fmt.Println(num, "is non-positive")
+	}
+
 	// first way
 	cond.If(num > 0).Then(func(cond.IfCtx) {
 		fmt.Println(num, "is positive")
@@ -56,18 +54,17 @@ func ExampleIfThenElse() {
 }
 
 func ExampleIfThenElseIfThenElse() {
-	// These examples are equivalent to:
-	//
-	//    num := 10
-	//    if num > 0 {
-	//	     fmt.Println(num, "is positive")
-	//    } else if num < 0 {
-	//	     fmt.Println(num, "is negative")
-	//    } else {
-	//	     fmt.Println(num, "is zero")
-	//    }
-
 	num := 10
+
+	// These examples are equivalent to:
+	if num > 0 {
+		fmt.Println(num, "is positive")
+	} else if num < 0 {
+		fmt.Println(num, "is negative")
+	} else {
+		fmt.Println(num, "is zero")
+	}
+
 	// first way
 	cond.If(num > 0).Then(func(cond.IfCtx) {
 		fmt.Println(num, "is positive")
@@ -95,12 +92,11 @@ func ExampleIfWithStmtThenElse() {
 	}
 
 	// These examples are equivalent to:
-	//
-	//    if num, err := divide(10, 0); err != nil {
-	//	      fmt.Println(err)
-	//    } else {
-	//	      fmt.Println(num)
-	//    }
+	if num, err := divide(10, 0); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(num)
+	}
 
 	// IfWithStmt saves the statement in IfCtx
 	// The key of IfCtx is the name of the variable, the value of IfCtx is the value of the variable
@@ -160,14 +156,13 @@ func ExampleIfWithStmtThenElseIfWithStmtThenElse() {
 	}
 
 	// These examples are equivalent to:
-	//
-	//    if file, err := findFile("./dir"); err != nil {
-	//	      fmt.Println(err)
-	//    } else if content, err := readFile(file); err != nil {
-	//	      fmt.Println(err)
-	//    } else {
-	//	      fmt.Println(content)
-	//    }
+	if file, err := findFile("./dir"); err != nil {
+		fmt.Println(err)
+	} else if content, err := readFile(file); err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(content)
+	}
 
 	// IfWithStmt saves the statement in IfCtx
 	// The key of IfCtx is the name of the variable, the value of IfCtx is the value of the variable
@@ -203,16 +198,15 @@ func ExampleIfWithStmtThenElseIfWithStmtThenElse() {
 }
 
 func ExampleIsType() {
-	var typ int
+	var typ any = 0
 
 	// Theis example is equivalent to:
-	//
-	//if _, ok := typ.(int); ok {
-	//	fmt.Println("type is int")
-	//}
-	//if _, ok := typ.(string); ok {
-	//	fmt.Println("type is string")
-	//}
+	if _, ok := typ.(int); ok {
+		fmt.Println("type is int")
+	}
+	if _, ok := typ.(string); ok {
+		fmt.Println("type is string")
+	}
 
 	if cond.IsType[int](typ) {
 		fmt.Println("type is int")
