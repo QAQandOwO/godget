@@ -1,8 +1,8 @@
-package cond
+package ctrlflow
 
 import (
 	"fmt"
-	"github.com/QAQandOwO/godget/cond"
+	"github.com/QAQandOwO/godget/ctrlflow"
 )
 
 func ExampleSwitchCaseThenDefault() {
@@ -21,19 +21,19 @@ func ExampleSwitchCaseThenDefault() {
 	// SwitchCtx saves the statement in SwitchCtx.Value
 
 	// first way
-	cond.Switch(getNum()).Case(0).Then(func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero")
-	}).Case(1, 2).Then(func(c cond.SwitchCtx[int]) {
+	}).Case(1, 2).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is one or two")
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is other number")
 	})
 	// second way
-	cond.Switch(getNum()).CaseThen([]int{0}, func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).CaseThen([]int{0}, func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero")
-	}).CaseThen([]int{1, 2}, func(c cond.SwitchCtx[int]) {
+	}).CaseThen([]int{1, 2}, func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is one or two")
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is other number")
 	})
 }
@@ -58,36 +58,36 @@ func ExampleSwitchCtxFallthrough() {
 
 	// SwitchCtx saves the statement in SwitchCtx.Value
 
-	cond.Switch(getNum()).Case(0).Then(func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(0)
 
 		// Fallthrough is recommended to be called at the end of the function
 		c.Fallthrough()
-	}).Case(1).Then(func(c cond.SwitchCtx[int]) {
+	}).Case(1).Then(func(c ctrlflow.SwitchCtx[int]) {
 		//Fallthrough is location-agnostic.
 		// As long as the Fallthrough method is used, the next case operation will be executed
 		c.Fallthrough()
 
 		fmt.Println(1)
-	}).Case(2).Then(func(c cond.SwitchCtx[int]) {
+	}).Case(2).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(2)
 
 		// Fallthrough is independent of the number of times it is used.
 		// As long as the Fallthrough method is used, the next case operation will be executed
 		c.Fallthrough()
 		c.Fallthrough()
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println("finished")
 	})
 
 	// Fallthrough is a method that can be used to determine whether to call Fallthrough using conditional judgment
-	cond.Switch(getNum()).Case(0, 1, 2).Then(func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).Case(0, 1, 2).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero, one or two")
 
 		if c.Value > 1 {
 			c.Fallthrough()
 		}
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is greater then one")
 	})
 }
@@ -109,14 +109,14 @@ func ExampleSwitchCtxBreak() {
 	// It is safer to use return keyword.
 
 	// Call Break
-	cond.Switch(getNum()).Case(0).Then(func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero")
 
 		c.Break()
 
 		// This procedure will not be performed
 		fmt.Println(c.Value, "is zero")
-	}).Case(1).Then(func(c cond.SwitchCtx[int]) {
+	}).Case(1).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is one")
 
 		// Even if the Fallthrough method is called before the Break method is called,
@@ -126,7 +126,7 @@ func ExampleSwitchCtxBreak() {
 
 		// This procedure will not be performed.
 		fmt.Println(c.Value, "is one")
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is number")
 
 		c.Break()
@@ -136,14 +136,14 @@ func ExampleSwitchCtxBreak() {
 	})
 
 	// Use return keyword
-	cond.Switch(getNum()).Case(0).Then(func(c cond.SwitchCtx[int]) {
+	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero")
 
 		return
 
 		// This procedure will not be performed.
 		fmt.Println(c.Value, "is zero")
-	}).Case(1).Then(func(c cond.SwitchCtx[int]) {
+	}).Case(1).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is one")
 
 		// Even if the Fallthrough method is called before return keyword is called,
@@ -153,7 +153,7 @@ func ExampleSwitchCtxBreak() {
 
 		// This procedure will not be performed
 		fmt.Println(c.Value, "is one")
-	}).Default(func(c cond.SwitchCtx[int]) {
+	}).Default(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is number")
 
 		return
@@ -183,27 +183,27 @@ func ExampleCondSwitchCaseThenDefault() {
 	}
 
 	// first way
-	cond.CondSwitch().Case(getMark() >= 90).Then(func(cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(getMark() >= 90).Then(func(ctrlflow.CondSwitchCtx) {
 		grade = "A"
-	}).Case(getMark() >= 80).Then(func(cond.CondSwitchCtx) {
+	}).Case(getMark() >= 80).Then(func(ctrlflow.CondSwitchCtx) {
 		grade = "B"
-	}).Case(getMark() >= 70).Then(func(cond.CondSwitchCtx) {
+	}).Case(getMark() >= 70).Then(func(ctrlflow.CondSwitchCtx) {
 		grade = "C"
-	}).Case(getMark() >= 60).Then(func(cond.CondSwitchCtx) {
+	}).Case(getMark() >= 60).Then(func(ctrlflow.CondSwitchCtx) {
 		grade = "D"
-	}).Default(func(cond.CondSwitchCtx) {
+	}).Default(func(ctrlflow.CondSwitchCtx) {
 		grade = "F"
 	})
 	// second way
-	cond.CondSwitch().CaseThen(getMark() >= 90, func(cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().CaseThen(getMark() >= 90, func(ctrlflow.CondSwitchCtx) {
 		grade = "A"
-	}).CaseThen(getMark() >= 80, func(cond.CondSwitchCtx) {
+	}).CaseThen(getMark() >= 80, func(ctrlflow.CondSwitchCtx) {
 		grade = "B"
-	}).CaseThen(getMark() >= 70, func(cond.CondSwitchCtx) {
+	}).CaseThen(getMark() >= 70, func(ctrlflow.CondSwitchCtx) {
 		grade = "C"
-	}).CaseThen(getMark() >= 60, func(cond.CondSwitchCtx) {
+	}).CaseThen(getMark() >= 60, func(ctrlflow.CondSwitchCtx) {
 		grade = "D"
-	}).Default(func(cond.CondSwitchCtx) {
+	}).Default(func(ctrlflow.CondSwitchCtx) {
 		grade = "F"
 	})
 }
@@ -226,36 +226,36 @@ func ExampleCondSwitchCtxFallthrough() {
 		fmt.Println("1")
 	}
 
-	cond.CondSwitch().Case(getNum() == 4).Then(func(c cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(getNum() == 4).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("4")
 
 		// Fallthrough is recommended to be called at the end of the function
 		c.Fallthrough()
-	}).Case(getNum() == 3).Then(func(c cond.CondSwitchCtx) {
+	}).Case(getNum() == 3).Then(func(c ctrlflow.CondSwitchCtx) {
 		//Fallthrough is location-agnostic.
 		// As long as the Fallthrough method is used, the next case operation will be executed
 		c.Fallthrough()
 
 		fmt.Println("3")
-	}).Case(getNum() == 2).Then(func(c cond.CondSwitchCtx) {
+	}).Case(getNum() == 2).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("2")
 
 		// Fallthrough is independent of the number of times it is used.
 		// As long as the Fallthrough method is used, the next case operation will be executed
 		c.Fallthrough()
 		c.Fallthrough()
-	}).Case(getNum() == 1).Then(func(c cond.CondSwitchCtx) {
+	}).Case(getNum() == 1).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("1")
 	})
 
 	// Fallthrough is a method that can be used to determine whether to call Fallthrough using conditional judgment
-	cond.CondSwitch().Case(getNum() == 0 || getNum() == 1).Then(func(c cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(getNum() == 0 || getNum() == 1).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is zero or one")
 
 		if getNum() > 0 {
 			c.Fallthrough()
 		}
-	}).Default(func(c cond.CondSwitchCtx) {
+	}).Default(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is greater then zero")
 	})
 }
@@ -277,14 +277,14 @@ func ExampleCondSwitchCtxBreak() {
 	// It is safer to use return keyword.
 
 	// Call Break
-	cond.CondSwitch().Case(getNum() == 0).Then(func(c cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(getNum() == 0).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is zero")
 
 		c.Break()
 
 		// This procedure will not be performed
 		fmt.Println("result is zero")
-	}).Case(getNum() == 1).Then(func(c cond.CondSwitchCtx) {
+	}).Case(getNum() == 1).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is one")
 
 		// Even if the Fallthrough method is called before the Break method is called,
@@ -294,7 +294,7 @@ func ExampleCondSwitchCtxBreak() {
 
 		// This procedure will not be performed.
 		fmt.Println("result is one")
-	}).Default(func(c cond.CondSwitchCtx) {
+	}).Default(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is number")
 
 		c.Break()
@@ -304,14 +304,14 @@ func ExampleCondSwitchCtxBreak() {
 	})
 
 	// Use return keyword
-	cond.CondSwitch().Case(getNum() == 0).Then(func(c cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(getNum() == 0).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is zero")
 
 		return
 
 		// This procedure will not be performed.
 		fmt.Println("result is zero")
-	}).Case(getNum() == 1).Then(func(c cond.CondSwitchCtx) {
+	}).Case(getNum() == 1).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is one")
 
 		// Even if the Fallthrough method is called before return keyword is called,
@@ -321,7 +321,7 @@ func ExampleCondSwitchCtxBreak() {
 
 		// This procedure will not be performed
 		fmt.Println("result is one")
-	}).Default(func(c cond.CondSwitchCtx) {
+	}).Default(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is number")
 
 		return
@@ -355,49 +355,49 @@ func ExampleTypeExample() {
 	// Besides, TypeSwitchCtx does not support the use of Fallthrough.
 
 	// first way
-	cond.TypeSwitch(value).Case(new(int), new(int64)).Then(func(c cond.TypeSwitchCtx) {
+	ctrlflow.TypeSwitch(value).Case(new(int), new(int64)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is int type")
-	}).Case(new(string)).Then(func(c cond.TypeSwitchCtx) {
+	}).Case(new(string)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(string), "is string type")
-	}).Default(func(c cond.TypeSwitchCtx) {
+	}).Default(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is other type")
 	})
 	// second way
-	cond.TypeSwitch(value).CaseThen([]any{new(int), new(int64)}, func(c cond.TypeSwitchCtx) {
+	ctrlflow.TypeSwitch(value).CaseThen([]any{new(int), new(int64)}, func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is int type")
-	}).CaseThen([]any{new(string)}, func(c cond.TypeSwitchCtx) {
+	}).CaseThen([]any{new(string)}, func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(string), "is string type")
-	}).Default(func(c cond.TypeSwitchCtx) {
+	}).Default(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is other type")
 	})
 
 	// In the Case and CaseThen method, you need to pass in a pointer of the matching type
 	// If it is not a pointer type, it will not match any type.
-	cond.TypeSwitch(value).Case(nil, 0, *new(any)).Then(func(cond.TypeSwitchCtx) {
+	ctrlflow.TypeSwitch(value).Case(nil, 0, *new(any)).Then(func(ctrlflow.TypeSwitchCtx) {
 		// Never match this case logic
 		fmt.Println("nil, int, or interface {}")
-	}).CaseThen([]any{nil, 0, *new(any)}, func(cond.TypeSwitchCtx) {
+	}).CaseThen([]any{nil, 0, *new(any)}, func(ctrlflow.TypeSwitchCtx) {
 		// Never match that case logic
 		fmt.Println("nil, int, or interface {}")
 	})
 
 	// Unlike Go native switch, which only supports interface types, TypeSwitch supports specific types.
 	value2 := 2
-	cond.TypeSwitch(value2).Case(new(int), new(int64)).Then(func(c cond.TypeSwitchCtx) {
+	ctrlflow.TypeSwitch(value2).Case(new(int), new(int64)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is int type")
-	}).Case(new(string)).Then(func(c cond.TypeSwitchCtx) {
+	}).Case(new(string)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(string), "is string type")
-	}).Default(func(c cond.TypeSwitchCtx) {
+	}).Default(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is other type")
 	})
 
 	// In fact, TypeSwitch is not recommended for type matching, because it is implemented with reflection.
 	// If you don't need to match types too precisely, you can use the following way.
-	cond.CondSwitch().Case(cond.IsType[int](value) || cond.IsType[int64](value)).Then(func(cond.CondSwitchCtx) {
+	ctrlflow.CondSwitch().Case(ctrlflow.IsType[int](value) || ctrlflow.IsType[int64](value)).Then(func(ctrlflow.CondSwitchCtx) {
 		fmt.Println(value, "is int type")
-	}).Case(cond.IsType[string](value)).Then(func(cond.CondSwitchCtx) {
+	}).Case(ctrlflow.IsType[string](value)).Then(func(ctrlflow.CondSwitchCtx) {
 		fmt.Println(value, "is string type")
-	}).Default(func(c cond.CondSwitchCtx) {
+	}).Default(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println(value, "is other type")
 	})
 }
@@ -416,14 +416,14 @@ func ExampleTypeSwitchCtxBreak() {
 	// Since TypeSwitchCtx does not support Fallthrough, the effect of using both is the same.
 	// Using return keyword is still recommended, because it is safer to use return keyword.
 
-	cond.TypeSwitch(value).Case(new(int)).Then(func(c cond.TypeSwitchCtx) {
+	ctrlflow.TypeSwitch(value).Case(new(int)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(int), "is int type")
 
 		c.Break()
 
 		// This procedure will not be performed
 		fmt.Println(c.Value.(int), "is int type")
-	}).Case(new(string)).Then(func(c cond.TypeSwitchCtx) {
+	}).Case(new(string)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(string), "is string type")
 
 		// Using the return keyword has the same effect as calling Break
@@ -431,7 +431,7 @@ func ExampleTypeSwitchCtxBreak() {
 
 		// This procedure will not be performed
 		fmt.Println(c.Value.(string), "is string type")
-	}).Default(func(c cond.TypeSwitchCtx) {
+	}).Default(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value, "is other type")
 	})
 }

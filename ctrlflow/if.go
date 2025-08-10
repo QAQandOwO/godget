@@ -1,7 +1,7 @@
 /*
-Package cond provides conditional constructs for Go.
+Package ctrlflow provides conditional constructs for Go.
 */
-package cond
+package ctrlflow
 
 // IfCtx provides shared variables across conditional branches.
 // It's a type alias for map[string]any for easy key-value storage.
@@ -21,7 +21,7 @@ type thenContext ifContext
 //
 // Example:
 //
-//	cond.If(age >= 18).Then(...)
+//	ctrlflow.If(age >= 18).Then(...)
 func If(cond bool) *ifContext {
 	return &ifContext{
 		cond:      cond,
@@ -34,7 +34,7 @@ func If(cond bool) *ifContext {
 //
 // Example:
 //
-//	cond.IfWithStmt(func(c IfCtx) bool {
+//	ctrlflow.IfWithStmt(func(c IfCtx) bool {
 //	    c["err"] = Fn()
 //	    return c["err"] != nil
 //	}).Then(...)
@@ -50,7 +50,7 @@ func IfWithStmt(condWithStmt func(IfCtx) bool) *ifContext {
 //
 // Example:
 //
-//	cond.IfWithStmt(func(c IfCtx) bool {
+//	ctrlflow.IfWithStmt(func(c IfCtx) bool {
 //	    c["number"], c["err"] = Div(10, 5)
 //	    return c["err"] == nil
 //	}).Then(func(c IfCtx) {

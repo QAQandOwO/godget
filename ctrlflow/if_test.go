@@ -1,7 +1,7 @@
-package cond_test
+package ctrlflow_test
 
 import (
-	"github.com/QAQandOwO/godget/cond"
+	"github.com/QAQandOwO/godget/ctrlflow"
 	"testing"
 )
 
@@ -23,9 +23,9 @@ func TestIf(t *testing.T) {
 	t.Run("If.Then.Else", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.If(test.cond).Then(func(cond.IfCtx) {
+			ctrlflow.If(test.cond).Then(func(ctrlflow.IfCtx) {
 				result = test.trueValue
-			}).Else(func(cond.IfCtx) {
+			}).Else(func(ctrlflow.IfCtx) {
 				result = test.falseValue
 			})
 
@@ -38,9 +38,9 @@ func TestIf(t *testing.T) {
 	t.Run("IfThen.Else", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.IfThen(test.cond, func() {
+			ctrlflow.IfThen(test.cond, func() {
 				result = test.trueValue
-			}).Else(func(cond.IfCtx) {
+			}).Else(func(ctrlflow.IfCtx) {
 				result = test.falseValue
 			})
 
@@ -53,7 +53,7 @@ func TestIf(t *testing.T) {
 	t.Run("IfThenElse", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.IfThenElse(test.cond,
+			ctrlflow.IfThenElse(test.cond,
 				func() { result = test.trueValue },
 				func() { result = test.falseValue })
 
@@ -71,15 +71,15 @@ func TestIf(t *testing.T) {
 					continue
 				}
 
-				cond.If(test.cond).Then(func(cond.IfCtx) {
+				ctrlflow.If(test.cond).Then(func(ctrlflow.IfCtx) {
 					result = test.trueValue
-				}).ElseIf(test2.cond).Then(func(cond.IfCtx) {
+				}).ElseIf(test2.cond).Then(func(ctrlflow.IfCtx) {
 					result = test2.trueValue
-				}).Else(func(cond.IfCtx) {
+				}).Else(func(ctrlflow.IfCtx) {
 					result = test2.falseValue
 				})
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
 					t.Errorf("If.Then.ElseIf.Then.Else get '%v', want '%v'", result, want)
 				}
@@ -95,15 +95,15 @@ func TestIf(t *testing.T) {
 					continue
 				}
 
-				cond.IfThen(test.cond, func() {
+				ctrlflow.IfThen(test.cond, func() {
 					result = test.trueValue
-				}).ElseIfThen(test2.cond, func(ctx cond.IfCtx) {
+				}).ElseIfThen(test2.cond, func(ctx ctrlflow.IfCtx) {
 					result = test2.trueValue
-				}).Else(func(cond.IfCtx) {
+				}).Else(func(ctrlflow.IfCtx) {
 					result = test2.falseValue
 				})
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
 					t.Errorf("IfThen.ElseIfThen.Else get '%v', want '%v'", result, want)
 				}
@@ -116,9 +116,9 @@ func TestIfWithStmt(t *testing.T) {
 	t.Run("IfWithStmt.Then.Else", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.IfWithStmt(func(c cond.IfCtx) bool { c["caseMap"] = test; return test.cond }).Then(func(c cond.IfCtx) {
+			ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test; return test.cond }).Then(func(c ctrlflow.IfCtx) {
 				result = c["caseMap"].(ifTest[string]).trueValue
-			}).Else(func(c cond.IfCtx) {
+			}).Else(func(c ctrlflow.IfCtx) {
 				result = c["caseMap"].(ifTest[string]).falseValue
 			})
 
@@ -131,9 +131,9 @@ func TestIfWithStmt(t *testing.T) {
 	t.Run("IfWithStmtThen.Else", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.IfWithStmtThen(func(c cond.IfCtx) bool { c["caseMap"] = test; return test.cond }, func(c cond.IfCtx) {
+			ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test; return test.cond }, func(c ctrlflow.IfCtx) {
 				result = c["caseMap"].(ifTest[string]).trueValue
-			}).Else(func(c cond.IfCtx) {
+			}).Else(func(c ctrlflow.IfCtx) {
 				result = c["caseMap"].(ifTest[string]).falseValue
 			})
 
@@ -146,10 +146,10 @@ func TestIfWithStmt(t *testing.T) {
 	t.Run("IfWithStmtThenElse", func(t *testing.T) {
 		var result string
 		for _, test := range ifTests {
-			cond.IfWithStmtThenElse(
-				func(c cond.IfCtx) bool { c["caseMap"] = test; return test.cond },
-				func(c cond.IfCtx) { result = c["caseMap"].(ifTest[string]).trueValue },
-				func(c cond.IfCtx) { result = c["caseMap"].(ifTest[string]).falseValue },
+			ctrlflow.IfWithStmtThenElse(
+				func(c ctrlflow.IfCtx) bool { c["caseMap"] = test; return test.cond },
+				func(c ctrlflow.IfCtx) { result = c["caseMap"].(ifTest[string]).trueValue },
+				func(c ctrlflow.IfCtx) { result = c["caseMap"].(ifTest[string]).falseValue },
 			)
 
 			if result != test.want {
@@ -166,15 +166,15 @@ func TestIfWithStmt(t *testing.T) {
 					continue
 				}
 
-				cond.IfWithStmt(func(c cond.IfCtx) bool { c["caseMap"], c["value2"] = test, test2; return test.cond }).Then(func(c cond.IfCtx) {
+				ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool { c["caseMap"], c["value2"] = test, test2; return test.cond }).Then(func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).trueValue
-				}).ElseIf(test2.cond).Then(func(c cond.IfCtx) {
+				}).ElseIf(test2.cond).Then(func(c ctrlflow.IfCtx) {
 					result = c["value2"].(ifTest[string]).trueValue
-				}).Else(func(c cond.IfCtx) {
+				}).Else(func(c ctrlflow.IfCtx) {
 					result = c["value2"].(ifTest[string]).falseValue
 				})
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
 					t.Errorf("IfWithStmt.Then.ElseIf.Then.Else get '%v', want '%v'", result, want)
 				}
@@ -190,15 +190,15 @@ func TestIfWithStmt(t *testing.T) {
 					continue
 				}
 
-				cond.IfWithStmt(func(c cond.IfCtx) bool { c["caseMap"] = test; return test.cond }).Then(func(c cond.IfCtx) {
+				ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test; return test.cond }).Then(func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).trueValue
-				}).ElseIfWithStmt(func(c cond.IfCtx) bool { c["caseMap"] = test2; return test2.cond }).Then(func(c cond.IfCtx) {
+				}).ElseIfWithStmt(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test2; return test2.cond }).Then(func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).trueValue
-				}).Else(func(c cond.IfCtx) {
+				}).Else(func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).falseValue
 				})
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
 					t.Errorf("IfWithStmt.Then.ElseIfWithStmt.Then.Else get '%v', want '%v'", result, want)
 				}
@@ -214,15 +214,15 @@ func TestIfWithStmt(t *testing.T) {
 					continue
 				}
 
-				cond.IfWithStmtThen(func(c cond.IfCtx) bool { c["caseMap"] = test; return test.cond }, func(c cond.IfCtx) {
+				ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test; return test.cond }, func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).trueValue
-				}).ElseIfWithStmtThen(func(c cond.IfCtx) bool { c["caseMap"] = test2; return test2.cond }, func(c cond.IfCtx) {
+				}).ElseIfWithStmtThen(func(c ctrlflow.IfCtx) bool { c["caseMap"] = test2; return test2.cond }, func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).trueValue
-				}).Else(func(c cond.IfCtx) {
+				}).Else(func(c ctrlflow.IfCtx) {
 					result = c["caseMap"].(ifTest[string]).falseValue
 				})
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
 					t.Errorf("IfWithStmtThen.ElseIfWithStmtThen.Else get '%v', want '%v'", result, want)
 				}
@@ -259,22 +259,22 @@ func TestIsType(t *testing.T) {
 	var result string
 	for _, test := range isTypeTests {
 		switch {
-		case cond.IsType[int](test.value):
+		case ctrlflow.IsType[int](test.value):
 			result = "int"
-		case cond.IsType[float64](test.value):
+		case ctrlflow.IsType[float64](test.value):
 			result = "float64"
-		case cond.IsType[string](test.value):
+		case ctrlflow.IsType[string](test.value):
 			result = "string"
-		case cond.IsType[struct{}](test.value):
+		case ctrlflow.IsType[struct{}](test.value):
 			result = "struct"
-		case cond.IsType[testIface](test.value):
+		case ctrlflow.IsType[testIface](test.value):
 			result = "testIface"
 		default:
 			result = "other"
 		}
 
 		if result != test.want {
-			t.Errorf("cond.IsType get %v, want %v", result, test.want)
+			t.Errorf("ctrlflow.IsType get %v, want %v", result, test.want)
 		}
 	}
 }

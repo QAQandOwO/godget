@@ -1,15 +1,13 @@
 /*
-Package cond provides fluent switch operations for values, conditions, and types.
+Package ctrlflow provides fluent switch operations for values, conditions, and types.
 
   - Value matching: Switch(val).Case(x).Then(fn)
   - Conditional branches: CondSwitch().Case(cond).Then(fn)
   - Type switching: TypeSwitch(val).Case(new(T)).Then(fn)
 */
-package cond
+package ctrlflow
 
 import "reflect"
-
-type switchBreak struct{}
 
 // switchContext holds the state for value-matching switch operations.
 type switchContext[T comparable] struct {
@@ -34,7 +32,7 @@ type SwitchCtx[T comparable] struct {
 //
 // Example:
 //
-//	cond.Switch(score).
+//	ctrlflow.Switch(score).
 //	    Case(90, 100).Then(func(ctx *SwitchCtx[int]) { ... })
 func Switch[T comparable](value T) *switchContext[T] {
 	return &switchContext[T]{value: value}
@@ -117,7 +115,7 @@ func (c *switchContext[T]) Default(fn func(ctx SwitchCtx[T])) {
 // Please use Fallthrough() at the end of the switch operation.
 //
 // Example:
-// cond.Switch(score).
+// ctrlflow.Switch(score).
 //
 //	Case(90, 100).Then(func(c *SwitchCtx[int]) {
 //	    ...
@@ -129,9 +127,10 @@ func (c SwitchCtx[T]) Fallthrough() {
 }
 
 // Break allows a case to break out of the switch operation.
+// If you don't use Break in the scope of the Switch to which SwitchCtx belongs, a panic will occur.
 func (c SwitchCtx[T]) Break() {
 	*c.broken = true
-	panic(switchBreak{})
+	panic(ErrBreakOutScope)
 }
 
 // valueCase performs equality check between a value and candidates.
@@ -236,9 +235,10 @@ func (c CondSwitchCtx) Fallthrough() {
 }
 
 // Break allows a case to break out of the switch operation.
+// If you don't use Break in the scope of the CondSwitch to which CondSwitchCtx belongs, a panic will occur.
 func (c CondSwitchCtx) Break() {
 	*c.broken = true
-	panic(switchBreak{})
+	panic(ErrBreakOutScope)
 }
 
 // typeSwitchContext holds the state for type-switch operations.
@@ -285,7 +285,7 @@ func TypeSwitch[T any](value T) *typeSwitchContext[T] {
 //
 // Example:
 //
-//	cond.SwitchType(42).
+//	ctrlflow.SwitchType(42).
 //	    Case(new(int)).Then(...)      // match
 //	    Case(new(string)).Then(...)   // not match
 func (c *typeSwitchContext[T]) Case(types ...any) *typeCaseContext[T] {
@@ -363,9 +363,10 @@ func (c *typeSwitchContext[T]) Default(fn func(TypeSwitchCtx)) {
 // }
 
 // Break allows a case to break out of the switch operation.
+// If you don't use Break in the scope of the TypeSwitch to which TypeSwitchCtx belongs, a panic will occur.
 func (c TypeSwitchCtx) Break() {
 	*c.broken = true
-	panic(switchBreak{})
+	panic(ErrBreakOutScope)
 }
 
 // typeCase checks if a value matches any of the given types.

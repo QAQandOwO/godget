@@ -1,7 +1,7 @@
-package cond_test
+package ctrlflow_test
 
 import (
-	"github.com/QAQandOwO/godget/cond"
+	"github.com/QAQandOwO/godget/ctrlflow"
 	"testing"
 )
 
@@ -21,10 +21,10 @@ var ternaryTests = []ternaryTest[string]{
 
 func TestTernary(t *testing.T) {
 	for _, test := range ternaryTests {
-		result := cond.Ternary(test.cond, test.trueValue, test.falseValue)
+		result := ctrlflow.Ternary(test.cond, test.trueValue, test.falseValue)
 
 		if result != test.want {
-			t.Errorf("cond.Ternary get '%v', want '%v'", result, test.want)
+			t.Errorf("ctrlflow.Ternary get '%v', want '%v'", result, test.want)
 		}
 	}
 }
@@ -32,10 +32,10 @@ func TestTernary(t *testing.T) {
 func TestTernCond(t *testing.T) {
 	t.Run("TernCond.True.False", func(t *testing.T) {
 		for _, test := range ternaryTests {
-			result := cond.TernCond[string](test.cond).True(test.trueValue).False(test.falseValue)
+			result := ctrlflow.TernCond[string](test.cond).True(test.trueValue).False(test.falseValue)
 
 			if result != test.want {
-				t.Errorf("cond.TernCond.True.False get '%v', want '%v'", result, test.want)
+				t.Errorf("ctrlflow.TernCond.True.False get '%v', want '%v'", result, test.want)
 			}
 		}
 	})
@@ -47,12 +47,12 @@ func TestTernCond(t *testing.T) {
 					continue
 				}
 
-				result := cond.TernCond[string](test.cond).True(test.trueValue).
+				result := ctrlflow.TernCond[string](test.cond).True(test.trueValue).
 					FalseCond(test2.cond).True(test2.trueValue).False(test2.falseValue)
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
-					t.Errorf("cond.TernCond.True.FalseCond.True.False get '%v', want '%v'", result, want)
+					t.Errorf("ctrlflow.TernCond.True.FalseCond.True.False get '%v', want '%v'", result, want)
 				}
 			}
 		}
@@ -75,10 +75,10 @@ var ternaryAnyTests = []ternaryAnyTest{
 
 func TestTernaryAny(t *testing.T) {
 	for _, test := range ternaryAnyTests {
-		result := cond.TernaryAny(test.cond, test.trueValue, test.falseValue)
+		result := ctrlflow.TernaryAny(test.cond, test.trueValue, test.falseValue)
 
 		if result != test.want {
-			t.Errorf("cond.TernaryAny get '%v', want '%v'", result, test.want)
+			t.Errorf("ctrlflow.TernaryAny get '%v', want '%v'", result, test.want)
 		}
 	}
 }
@@ -86,10 +86,10 @@ func TestTernaryAny(t *testing.T) {
 func TestTernCondAny(t *testing.T) {
 	t.Run("TernCondAny.True.False", func(t *testing.T) {
 		for _, test := range ternaryAnyTests {
-			result := cond.TernCondAny(test.cond).True(test.trueValue).False(test.falseValue)
+			result := ctrlflow.TernCondAny(test.cond).True(test.trueValue).False(test.falseValue)
 
 			if result != test.want {
-				t.Errorf("cond.TernCondAny.True.False get '%v', want '%v'", result, test.want)
+				t.Errorf("ctrlflow.TernCondAny.True.False get '%v', want '%v'", result, test.want)
 			}
 		}
 	})
@@ -101,12 +101,12 @@ func TestTernCondAny(t *testing.T) {
 					continue
 				}
 
-				result := cond.TernCondAny(test.cond).True(test.trueValue).
+				result := ctrlflow.TernCondAny(test.cond).True(test.trueValue).
 					FalseCond(test2.cond).True(test2.trueValue).False(test2.falseValue)
 
-				want := cond.Ternary(test.cond, test.want, test2.want)
+				want := ctrlflow.Ternary(test.cond, test.want, test2.want)
 				if result != want {
-					t.Errorf("cond.TernCondAny.True.FalseCond.True.False get '%v', want '%v'", result, want)
+					t.Errorf("ctrlflow.TernCondAny.True.FalseCond.True.False get '%v', want '%v'", result, want)
 				}
 			}
 		}

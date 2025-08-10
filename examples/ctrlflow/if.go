@@ -1,8 +1,8 @@
-package cond
+package ctrlflow
 
 import (
 	"fmt"
-	"github.com/QAQandOwO/godget/cond"
+	"github.com/QAQandOwO/godget/ctrlflow"
 )
 
 func ExampleIfThen() {
@@ -14,11 +14,11 @@ func ExampleIfThen() {
 	}
 
 	// first way
-	cond.If(num > 0).Then(func(cond.IfCtx) {
+	ctrlflow.If(num > 0).Then(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is positive")
 	})
 	// second way
-	cond.IfThen(num > 0, func() {
+	ctrlflow.IfThen(num > 0, func() {
 		fmt.Println(num, "is positive")
 	})
 }
@@ -34,19 +34,19 @@ func ExampleIfThenElse() {
 	}
 
 	// first way
-	cond.If(num > 0).Then(func(cond.IfCtx) {
+	ctrlflow.If(num > 0).Then(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is positive")
-	}).Else(func(cond.IfCtx) {
+	}).Else(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is non-positive")
 	})
 	// second way
-	cond.IfThen(num > 0, func() {
+	ctrlflow.IfThen(num > 0, func() {
 		fmt.Println(num, "is positive")
-	}).Else(func(cond.IfCtx) {
+	}).Else(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is non-positive")
 	})
 	// third way
-	cond.IfThenElse(num > 0, func() {
+	ctrlflow.IfThenElse(num > 0, func() {
 		fmt.Println(num, "is positive")
 	}, func() {
 		fmt.Println(num, "is non-positive")
@@ -66,19 +66,19 @@ func ExampleIfThenElseIfThenElse() {
 	}
 
 	// first way
-	cond.If(num > 0).Then(func(cond.IfCtx) {
+	ctrlflow.If(num > 0).Then(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is positive")
-	}).ElseIf(num < 0).Then(func(cond.IfCtx) {
+	}).ElseIf(num < 0).Then(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is negative")
-	}).Else(func(cond.IfCtx) {
+	}).Else(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is zero")
 	})
 	// second way
-	cond.IfThen(num > 0, func() {
+	ctrlflow.IfThen(num > 0, func() {
 		fmt.Println(num, "is positive")
-	}).ElseIfThen(num < 0, func(ctx cond.IfCtx) {
+	}).ElseIfThen(num < 0, func(ctx ctrlflow.IfCtx) {
 		fmt.Println(num, "is negative")
-	}).Else(func(cond.IfCtx) {
+	}).Else(func(ctrlflow.IfCtx) {
 		fmt.Println(num, "is zero")
 	})
 }
@@ -102,30 +102,30 @@ func ExampleIfWithStmtThenElse() {
 	// The key of IfCtx is the name of the variable, the value of IfCtx is the value of the variable
 
 	// first way
-	cond.IfWithStmt(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool {
 		c["num"], c["err"] = divide(10, 0)
 		return c["err"] != nil
-	}).Then(func(c cond.IfCtx) {
+	}).Then(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).Else(func(c cond.IfCtx) {
+	}).Else(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["num"])
 	})
 	// second way
-	cond.IfWithStmtThen(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool {
 		c["num"], c["err"] = divide(10, 0)
 		return c["err"] != nil
-	}, func(c cond.IfCtx) {
+	}, func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).Else(func(c cond.IfCtx) {
+	}).Else(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["num"])
 	})
 	// third way
-	cond.IfWithStmtThenElse(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmtThenElse(func(c ctrlflow.IfCtx) bool {
 		c["num"], c["err"] = divide(10, 0)
 		return c["err"] != nil
-	}, func(c cond.IfCtx) {
+	}, func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}, func(c cond.IfCtx) {
+	}, func(c ctrlflow.IfCtx) {
 		fmt.Println(c["num"])
 	})
 }
@@ -168,31 +168,31 @@ func ExampleIfWithStmtThenElseIfWithStmtThenElse() {
 	// The key of IfCtx is the name of the variable, the value of IfCtx is the value of the variable
 
 	// first way
-	cond.IfWithStmt(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool {
 		c["file"], c["err"] = findFile("./dir")
 		return c["err"] != nil
-	}).Then(func(c cond.IfCtx) {
+	}).Then(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).ElseIfWithStmt(func(c cond.IfCtx) bool {
+	}).ElseIfWithStmt(func(c ctrlflow.IfCtx) bool {
 		c["content"], c["err"] = readFile(c["file"].(*fileInfo))
 		return c["err"] != nil
-	}).Then(func(c cond.IfCtx) {
+	}).Then(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).Else(func(c cond.IfCtx) {
+	}).Else(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["content"])
 	})
 	// second way
-	cond.IfWithStmtThen(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool {
 		c["file"], c["err"] = findFile("./dir")
 		return c["err"] != nil
-	}, func(c cond.IfCtx) {
+	}, func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).ElseIfWithStmtThen(func(c cond.IfCtx) bool {
+	}).ElseIfWithStmtThen(func(c ctrlflow.IfCtx) bool {
 		c["content"], c["err"] = readFile(c["file"].(*fileInfo))
 		return c["err"] != nil
-	}, func(c cond.IfCtx) {
+	}, func(c ctrlflow.IfCtx) {
 		fmt.Println(c["err"])
-	}).Else(func(c cond.IfCtx) {
+	}).Else(func(c ctrlflow.IfCtx) {
 		fmt.Println(c["content"])
 	})
 }
@@ -208,10 +208,10 @@ func ExampleIsType() {
 		fmt.Println("type is string")
 	}
 
-	if cond.IsType[int](typ) {
+	if ctrlflow.IsType[int](typ) {
 		fmt.Println("type is int")
 	}
-	if cond.IsType[string](typ) {
+	if ctrlflow.IsType[string](typ) {
 		fmt.Println("type is string")
 	}
 }

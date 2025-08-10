@@ -1,11 +1,11 @@
 /*
-Package cond provides fluent conditional operations, including type-safe ternary operations.
+Package ctrlflow provides fluent conditional operations, including type-safe ternary operations.
 
 The ternary APIs offer two styles:
   - Immediate evaluation: Ternary/TernaryAny
   - Builder pattern: TernCond/TernCondAny
 */
-package cond
+package ctrlflow
 
 // ternCondContext holds the state of a ternary chain.
 // It tracks the condition, resolved value, and completion status.
@@ -19,11 +19,11 @@ type ternCondContext[T any] struct {
 // It allows chaining False() or FalseCond().
 type ternTrueContext[T any] ternCondContext[T]
 
-// Ternary returns trueValue if cond is true, otherwise falseValue.
+// Ternary returns trueValue if ctrlflow is true, otherwise falseValue.
 //
 // Example:
 //
-//	result := cond.Ternary(ok, "yes", "no")
+//	result := ctrlflow.Ternary(ok, "yes", "no")
 func Ternary[T any](cond bool, trueValue, falseValue T) T {
 	if cond {
 		return trueValue
@@ -35,7 +35,7 @@ func Ternary[T any](cond bool, trueValue, falseValue T) T {
 //
 // Example:
 //
-//	result := cond.TernCond[int](len(data) > 0).
+//	result := ctrlflow.TernCond[int](len(data) > 0).
 //	    True(expensiveCompute()).
 //	    False(defaultValue)
 func TernCond[T any](cond bool) *ternCondContext[T] {
@@ -85,7 +85,7 @@ type ternTrueContextAny ternCondContextAny
 //
 // Example:
 //
-//	result := cond.TernaryAny(ok, 42, "default") // returns either int or string
+//	result := ctrlflow.TernaryAny(ok, 42, "default") // returns either int or string
 func TernaryAny(cond bool, trueValue, falseValue any) any {
 	if cond {
 		return trueValue

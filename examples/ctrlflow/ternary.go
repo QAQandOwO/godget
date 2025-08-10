@@ -1,7 +1,7 @@
-package cond
+package ctrlflow
 
 import (
-	"github.com/QAQandOwO/godget/cond"
+	"github.com/QAQandOwO/godget/ctrlflow"
 )
 
 func ExampleTernary() {
@@ -36,7 +36,7 @@ func ExampleTernary() {
 	//    sign = "positive" if number > 0 else "non-positive"
 
 	number := 10
-	sign := cond.Ternary(number > 0, "positive", "non-positive")
+	sign := ctrlflow.Ternary(number > 0, "positive", "non-positive")
 
 	_ = sign
 }
@@ -73,7 +73,7 @@ func ExampleTernCondTrueFalse() {
 	//    sign = "positive" if number > 0 else "non-positive"
 
 	number := 10
-	sign := cond.TernCond[string](number > 0).
+	sign := ctrlflow.TernCond[string](number > 0).
 		True("positive").
 		False("non-positive")
 
@@ -119,7 +119,7 @@ func ExampleTernCondTrueFalseCondTrueFalse() {
 	//           "negative" if number < 0 else "zero"
 
 	number := 10
-	sign := cond.TernCond[string](number > 0).True("positive").
+	sign := ctrlflow.TernCond[string](number > 0).True("positive").
 		FalseCond(number < 0).True("negative").False("zero")
 
 	_ = sign
@@ -157,7 +157,7 @@ func ExampleTernaryAny() {
 	//    num = 0 if typ == "int" else "0"
 
 	typ := "int"
-	num := cond.TernaryAny(typ == "int", 0, "0")
+	num := ctrlflow.TernaryAny(typ == "int", 0, "0")
 
 	_ = num
 }
@@ -194,7 +194,7 @@ func ExampleTernCondAnyTrueFalse() {
 	//    num = 0 if typ == "int" else "0"
 
 	typ := "int"
-	num := cond.TernCondAny(typ == "int").True(0).False("0")
+	num := ctrlflow.TernCondAny(typ == "int").True(0).False("0")
 
 	_ = num
 }
@@ -238,7 +238,7 @@ func ExampleTernCondAnyTrueFalseCondTrueFalse() {
 	//          0.0 if typ == "float" else "0"
 
 	typ := "int"
-	num := cond.TernCondAny(typ == "int").True(0).
+	num := ctrlflow.TernCondAny(typ == "int").True(0).
 		FalseCond(typ == "float").True(0.0).False("0")
 
 	_ = num

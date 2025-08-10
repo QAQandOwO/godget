@@ -1,5 +1,5 @@
 /*
-Package cond provides fluent, type-safe conditional operations for Go.
+Package ctrlflow provides functional control flow operations for Go.
 
 It offers three main categories of operations:
 
@@ -25,30 +25,30 @@ Examples:
 
 // Ternary
 
-	result := cond.Ternary(age >= 18, "adult", "child")
+	result := ctrlflow.Ternary(age >= 18, "adult", "child")
 
 // If-Else
 
-	cond.IfWithStmt(func(c cond.IfCtx) bool {
+	ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool {
 	    c["result"], c["err"] = someOperation()
 	    return c["err"] == nil
-	}).Then(func(c cond.IfCtx) {
+	}).Then(func(c ctrlflow.IfCtx) {
 	    fmt.Println("Success:", c["result"])
-	}).Else(func(c cond.IfCtx) {
+	}).Else(func(c ctrlflow.IfCtx) {
 	    fmt.Println("Error:", c["err"])
 	})
 
 // Switch
 
-	cond.Switch(score).
-	Case(90, 100).Then(func(ctx cond.SwitchCtx[int]) {
+	ctrlflow.Switch(score).
+	Case(90, 100).Then(func(ctx ctrlflow.SwitchCtx[int]) {
 	    grade = "A"
 	}).
-	Case(80).Then(func(ctx cond.SwitchCtx[int]) {
+	Case(80).Then(func(ctx ctrlflow.SwitchCtx[int]) {
 	    grade = "B"
 	}).
-	Default(func(ctx cond.SwitchCtx[int]) {
+	Default(func(ctx ctrlflow.SwitchCtx[int]) {
 		grade = "C"
 	})
 */
-package cond
+package ctrlflow
