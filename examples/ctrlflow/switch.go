@@ -95,24 +95,20 @@ func ExampleSwitchCtxFallthrough() {
 func ExampleSwitchCtxBreak() {
 	getNum := func() int { return 2 }
 
-	// There are two ways to stop the case control logic early:
-	//
-	// 1. Call Break:
-	//    Calling Break can exit the entire switch control.
-	//    This does not execute any subsequent case and default control logic.
-	//
-	// 2. Use return keyword:
-	//    Use return keyword in the argument of Then, which can stop the current case control logic early.
-	//    If the Fallthrough method is called before return, the next case or default control logic is still executed.
-	//
-	// Although the Break method is more powerful, using return keyword is still recommended.
-	// It is safer to use return keyword.
+	// Calling Break stops the Switch control flow,
+	// but still executes your program following Break method in the same scope of Case.
+	// If you want to stop the Case control flow, you can use the return keyword after calling Break
 
-	// Call Break
+	// If the Fallthrough method is not called before calling Break,
+	// you can use the return keyword instead of calling Break.
+
+	// If Fallthrough is called before the return keyword and no Break is called, the next Case control logic is executed.
+
 	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
 		fmt.Println(c.Value, "is zero")
 
 		c.Break()
+		return
 
 		// This procedure will not be performed
 		fmt.Println(c.Value, "is zero")
@@ -124,42 +120,22 @@ func ExampleSwitchCtxBreak() {
 		c.Fallthrough()
 		c.Break()
 
-		// This procedure will not be performed.
+		// This procedure will be performed.
 		fmt.Println(c.Value, "is one")
-	}).Default(func(c ctrlflow.SwitchCtx[int]) {
-		fmt.Println(c.Value, "is number")
+	}).Case(2).Then(func(c ctrlflow.SwitchCtx[int]) {
+		fmt.Println(c.Value, "is two")
 
-		c.Break()
-
-		// This procedure will not be performed
-		fmt.Println(c.Value, "is number")
-	})
-
-	// Use return keyword
-	ctrlflow.Switch(getNum()).Case(0).Then(func(c ctrlflow.SwitchCtx[int]) {
-		fmt.Println(c.Value, "is zero")
-
-		return
-
-		// This procedure will not be performed.
-		fmt.Println(c.Value, "is zero")
-	}).Case(1).Then(func(c ctrlflow.SwitchCtx[int]) {
-		fmt.Println(c.Value, "is one")
-
-		// Even if the Fallthrough method is called before return keyword is called,
-		// the following case or default control program will be executed
+		// If Break isn't called, the next Case control logic is executed.
 		c.Fallthrough()
 		return
+	}).Case(3).Then(func(c ctrlflow.SwitchCtx[int]) {
+		fmt.Println(c.Value, "is three")
 
-		// This procedure will not be performed
-		fmt.Println(c.Value, "is one")
-	}).Default(func(c ctrlflow.SwitchCtx[int]) {
-		fmt.Println(c.Value, "is number")
-
+		// If Fallthrough isn't called, you can use return keyword without calling Break.
 		return
 
 		// This procedure will not be performed
-		fmt.Println(c.Value, "is number")
+		fmt.Println(c.Value, "is three")
 	})
 }
 
@@ -263,24 +239,20 @@ func ExampleCondSwitchCtxFallthrough() {
 func ExampleCondSwitchCtxBreak() {
 	getNum := func() int { return 2 }
 
-	// There are two ways to stop the case control logic early:
-	//
-	// 1. Call Break:
-	//    Calling Break can exit the entire switch control.
-	//    This does not execute any subsequent case and default control logic.
-	//
-	// 2. Use return keyword:
-	//    Use return keyword in the argument of Then, which can stop the current case control logic early.
-	//    If the Fallthrough method is called before return, the next case or default control logic is still executed.
-	//
-	// Although the Break method is more powerful, using return keyword is still recommended.
-	// It is safer to use return keyword.
+	// Calling Break stops the CondSwitch control flow,
+	// but still executes your program following Break method in the same scope of Case.
+	// If you want to stop the Case control flow, you can use the return keyword after calling Break.
 
-	// Call Break
+	// If the Fallthrough method is not called before calling Break,
+	// you can use the return keyword instead of calling Break.
+
+	// If Fallthrough is called before the return keyword and no Break is called, the next Case control logic is executed.
+
 	ctrlflow.CondSwitch().Case(getNum() == 0).Then(func(c ctrlflow.CondSwitchCtx) {
 		fmt.Println("result is zero")
 
 		c.Break()
+		return
 
 		// This procedure will not be performed
 		fmt.Println("result is zero")
@@ -292,42 +264,22 @@ func ExampleCondSwitchCtxBreak() {
 		c.Fallthrough()
 		c.Break()
 
-		// This procedure will not be performed.
+		// This procedure will be performed.
 		fmt.Println("result is one")
-	}).Default(func(c ctrlflow.CondSwitchCtx) {
-		fmt.Println("result is number")
+	}).Case(getNum() == 2).Then(func(c ctrlflow.CondSwitchCtx) {
+		fmt.Println("result is two")
 
-		c.Break()
-
-		// This procedure will not be performed
-		fmt.Println("result is number")
-	})
-
-	// Use return keyword
-	ctrlflow.CondSwitch().Case(getNum() == 0).Then(func(c ctrlflow.CondSwitchCtx) {
-		fmt.Println("result is zero")
-
-		return
-
-		// This procedure will not be performed.
-		fmt.Println("result is zero")
-	}).Case(getNum() == 1).Then(func(c ctrlflow.CondSwitchCtx) {
-		fmt.Println("result is one")
-
-		// Even if the Fallthrough method is called before return keyword is called,
-		// the following case or default control program will be executed
+		// If Break isn't called, the next Case control logic is executed.
 		c.Fallthrough()
 		return
+	}).Case(getNum() == 3).Then(func(c ctrlflow.CondSwitchCtx) {
+		fmt.Println("result is three")
 
-		// This procedure will not be performed
-		fmt.Println("result is one")
-	}).Default(func(c ctrlflow.CondSwitchCtx) {
-		fmt.Println("result is number")
-
+		// If Fallthrough isn't called, you can use return keyword without calling Break.
 		return
 
 		// This procedure will not be performed
-		fmt.Println("result is number")
+		fmt.Println("result is three")
 	})
 }
 
@@ -405,16 +357,9 @@ func ExampleTypeExample() {
 func ExampleTypeSwitchCtxBreak() {
 	var value any = "1"
 
-	// There are two ways to stop the case control logic early:
-	//
-	// 1. Call Break:
-	//    Calling Break can exit the entire switch control.
-	//
-	// 2. Use return keyword:
-	//    Use return keyword in the argument of Then, which can stop the current case control logic early.
-	//
-	// Since TypeSwitchCtx does not support Fallthrough, the effect of using both is the same.
-	// Using return keyword is still recommended, because it is safer to use return keyword.
+	// TypeSwitchCtx doesn't support Fallthrough,
+	// so calling Break and then using return keyword has the same effect as just using return keyword.
+	// Calling Break is only semantic readability
 
 	ctrlflow.TypeSwitch(value).Case(new(int)).Then(func(c ctrlflow.TypeSwitchCtx) {
 		fmt.Println(c.Value.(int), "is int type")

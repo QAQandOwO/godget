@@ -9,6 +9,39 @@ package ctrlflow
 
 import "reflect"
 
+// SwitchCtx carries the value and fallthrough control during switch operations.
+type SwitchCtx[T comparable] struct {
+	Value  T
+	fallen *bool
+	broken *bool
+}
+
+// Fallthrough allows a case to fall through to the next case.
+//
+// Note:
+// Fallthrough can not stop the switch operation following this method.
+// Please use Fallthrough() at the end of the switch operation.
+//
+// Example:
+// ctrlflow.Switch(score).
+//
+//	Case(90, 100).Then(func(c *SwitchCtx[int]) {
+//	    ...
+//	    Fallthrough()
+//	}).
+//	Case(...).Then(...)
+func (c SwitchCtx[T]) Fallthrough() {
+	*c.fallen = true
+}
+
+// Break  stop the Switch control flow.
+// Calling Break stops the CondSwitch control flow,
+// but still executes your program following Break method in the same scope of Case.
+// If you want to stop the Case control flow, you can use the return keyword after calling Break.
+func (c SwitchCtx[T]) Break() {
+	*c.broken = true
+}
+
 // switchContext holds the state for value-matching switch operations.
 type switchContext[T comparable] struct {
 	value  T
@@ -20,13 +53,6 @@ type switchContext[T comparable] struct {
 
 // caseContext represents the state after Case() is called.
 type caseContext[T comparable] switchContext[T]
-
-// SwitchCtx carries the value and fallthrough control during switch operations.
-type SwitchCtx[T comparable] struct {
-	Value  T
-	fallen *bool
-	broken *bool
-}
 
 // Switch starts a value-matching chain for comparable types.
 //
@@ -50,36 +76,26 @@ func (c *switchContext[T]) Case(values ...T) *caseContext[T] {
 
 // Then registers a function to execute if the case is matched.
 // SwitchCtx carries the value, break control and fallthrough control during switch operations.
-func (c *caseContext[T]) Then(fn func(ctx SwitchCtx[T])) (ctx *switchContext[T]) {
-	ctx = (*switchContext[T])(c)
-
-	var broken bool
-	defer func() {
-		if broken {
-			c.broken = true
-			recover()
-		}
-	}()
-
+func (c *caseContext[T]) Then(fn func(ctx SwitchCtx[T])) *switchContext[T] {
 	if c.broken {
-		return ctx
+		return (*switchContext[T])(c)
 	}
 	if c.fallen {
 		c.fallen = false
 		fn(SwitchCtx[T]{
 			Value:  c.value,
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	} else if !c.done && c.cased {
 		c.done = true
 		fn(SwitchCtx[T]{
 			Value:  c.value,
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
-	return ctx
+	return (*switchContext[T])(c)
 }
 
 // CaseThen registers values to compare against the switch value and executes the function if the case is matched.
@@ -89,13 +105,6 @@ func (c *switchContext[T]) CaseThen(values []T, fn func(ctx SwitchCtx[T])) *swit
 
 // Default registers a function to execute if no case is matched.
 func (c *switchContext[T]) Default(fn func(ctx SwitchCtx[T])) {
-	var broken bool
-	defer func() {
-		if broken {
-			recover()
-		}
-	}()
-
 	if c.broken {
 		return
 	}
@@ -103,34 +112,9 @@ func (c *switchContext[T]) Default(fn func(ctx SwitchCtx[T])) {
 		fn(SwitchCtx[T]{
 			Value:  c.value,
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
-}
-
-// Fallthrough allows a case to fall through to the next case.
-//
-// Note:
-// Fallthrough can not stop the switch operation following this method.
-// Please use Fallthrough() at the end of the switch operation.
-//
-// Example:
-// ctrlflow.Switch(score).
-//
-//	Case(90, 100).Then(func(c *SwitchCtx[int]) {
-//	    ...
-//	    Fallthrough()
-//	}).
-//	Case(...).Then(...)
-func (c SwitchCtx[T]) Fallthrough() {
-	*c.fallen = true
-}
-
-// Break allows a case to break out of the switch operation.
-// If you don't use Break in the scope of the Switch to which SwitchCtx belongs, a panic will occur.
-func (c SwitchCtx[T]) Break() {
-	*c.broken = true
-	panic(ErrBreakOutScope)
 }
 
 // valueCase performs equality check between a value and candidates.
@@ -143,6 +127,25 @@ func valueCase[T comparable](v T, values []T) bool {
 	return false
 }
 
+// CondSwitchCtx provides fallthrough control for conditional switches.
+type CondSwitchCtx struct {
+	fallen *bool
+	broken *bool
+}
+
+// Fallthrough allows a case to fall through to the next case.
+func (c CondSwitchCtx) Fallthrough() {
+	*c.fallen = true
+}
+
+// Break  stop the CondSwitch control flow.
+// Calling Break stops the CondSwitch control flow,
+// but still executes your program following Break method in the same scope of Case.
+// If you want to stop the Case control flow, you can use the return keyword after calling Break.
+func (c CondSwitchCtx) Break() {
+	*c.broken = true
+}
+
 // condSwitchContext holds the state for conditional-branching switch operations.
 type condSwitchContext struct {
 	cond   bool
@@ -153,12 +156,6 @@ type condSwitchContext struct {
 
 // condCaseContext represents the state after Case() in conditional switches.
 type condCaseContext condSwitchContext
-
-// CondSwitchCtx provides fallthrough control for conditional switches.
-type CondSwitchCtx struct {
-	fallen *bool
-	broken *bool
-}
 
 // CondSwitch starts a conditional branching chain.
 func CondSwitch() *condSwitchContext {
@@ -174,34 +171,24 @@ func (c *condSwitchContext) Case(cond bool) *condCaseContext {
 }
 
 // Then registers a function to execute if the case is matched.
-func (c *condCaseContext) Then(fn func(CondSwitchCtx)) (ctx *condSwitchContext) {
-	ctx = (*condSwitchContext)(c)
-
-	var broken bool
-	defer func() {
-		if broken {
-			c.broken = true
-			recover()
-		}
-	}()
-
+func (c *condCaseContext) Then(fn func(CondSwitchCtx)) *condSwitchContext {
 	if c.broken {
-		return ctx
+		return (*condSwitchContext)(c)
 	}
 	if c.fallen {
 		c.fallen = false
 		fn(CondSwitchCtx{
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	} else if !c.done && c.cond {
 		c.done = true
 		fn(CondSwitchCtx{
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
-	return ctx
+	return (*condSwitchContext)(c)
 }
 
 // CaseThen combines Case() and Then() for slice inputs.
@@ -211,34 +198,35 @@ func (c *condSwitchContext) CaseThen(cond bool, fn func(CondSwitchCtx)) *condSwi
 
 // Default registers a function to execute if no case is matched.
 func (c *condSwitchContext) Default(fn func(CondSwitchCtx)) {
-	var broken bool
-	defer func() {
-		if broken {
-			recover()
-		}
-	}()
-
 	if c.broken {
 		return
 	}
 	if c.fallen || !c.done {
 		fn(CondSwitchCtx{
 			fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
 }
 
-// Fallthrough allows a case to fall through to the next case.
-func (c CondSwitchCtx) Fallthrough() {
-	*c.fallen = true
+// TypeSwitchCtx carries the value and fall through control during type switches.
+type TypeSwitchCtx struct {
+	Value any
+	//fallen *bool
+	broken *bool
 }
 
-// Break allows a case to break out of the switch operation.
-// If you don't use Break in the scope of the CondSwitch to which CondSwitchCtx belongs, a panic will occur.
-func (c CondSwitchCtx) Break() {
+// // Fallthrough allows a case to fall through to the next case.
+// func (c TypeSwitchCtx) Fallthrough() {
+//	   *c.fallen = true
+// }
+
+// Break stop the TypeSwitch control flow.
+// Calling Break stops the CondSwitch control flow,
+// but still executes your program following Break method in the same scope of Case.
+// If you want to stop the Case control flow, you can use the return keyword after calling Break.
+func (c TypeSwitchCtx) Break() {
 	*c.broken = true
-	panic(ErrBreakOutScope)
 }
 
 // typeSwitchContext holds the state for type-switch operations.
@@ -252,13 +240,6 @@ type typeSwitchContext[T any] struct {
 
 // typeCaseContext represents the state after Case() in type switches.
 type typeCaseContext[T any] typeSwitchContext[T]
-
-// TypeSwitchCtx carries the value and fall through control during type switches.
-type TypeSwitchCtx struct {
-	Value any
-	//fallen *bool
-	broken *bool
-}
 
 // TypeSwitch starts a type-switch chain.
 // Input value of concrete type or interface type.
@@ -296,19 +277,9 @@ func (c *typeSwitchContext[T]) Case(types ...any) *typeCaseContext[T] {
 }
 
 // Then registers a function to execute if the case is matched.
-func (c *typeCaseContext[T]) Then(fn func(ctx TypeSwitchCtx)) (ctx *typeSwitchContext[T]) {
-	ctx = (*typeSwitchContext[T])(c)
-
-	var broken bool
-	defer func() {
-		if broken {
-			c.broken = true
-			recover()
-		}
-	}()
-
+func (c *typeCaseContext[T]) Then(fn func(ctx TypeSwitchCtx)) *typeSwitchContext[T] {
 	if c.broken {
-		return ctx
+		return (*typeSwitchContext[T])(c)
 	}
 	/*
 		if c.fallen {
@@ -325,10 +296,10 @@ func (c *typeCaseContext[T]) Then(fn func(ctx TypeSwitchCtx)) (ctx *typeSwitchCo
 		fn(TypeSwitchCtx{
 			Value: c.value,
 			//fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
-	return ctx
+	return (*typeSwitchContext[T])(c)
 }
 
 // CaseThen combines Case() and Then() for slice inputs.
@@ -338,13 +309,6 @@ func (c *typeSwitchContext[T]) CaseThen(types []any, fn func(ctx TypeSwitchCtx))
 
 // Default registers a function to execute if no case is matched.
 func (c *typeSwitchContext[T]) Default(fn func(TypeSwitchCtx)) {
-	var broken bool
-	defer func() {
-		if broken {
-			recover()
-		}
-	}()
-
 	if c.broken {
 		return
 	}
@@ -352,21 +316,9 @@ func (c *typeSwitchContext[T]) Default(fn func(TypeSwitchCtx)) {
 		fn(TypeSwitchCtx{
 			Value: c.value,
 			//fallen: &c.fallen,
-			broken: &broken,
+			broken: &c.broken,
 		})
 	}
-}
-
-// // Fallthrough allows a case to fall through to the next case.
-// func (c TypeSwitchCtx) Fallthrough() {
-//	   *c.fallen = true
-// }
-
-// Break allows a case to break out of the switch operation.
-// If you don't use Break in the scope of the TypeSwitch to which TypeSwitchCtx belongs, a panic will occur.
-func (c TypeSwitchCtx) Break() {
-	*c.broken = true
-	panic(ErrBreakOutScope)
 }
 
 // typeCase checks if a value matches any of the given types.

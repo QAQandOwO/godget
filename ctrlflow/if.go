@@ -5,12 +5,14 @@ package ctrlflow
 
 // IfCtx provides shared variables across conditional branches.
 // It's a type alias for map[string]any for easy key-value storage.
-type IfCtx = map[string]any
+type IfCtx struct {
+	Values map[string]any
+}
 
 // ifContext holds the state of an If-Else chain.
 type ifContext struct {
 	cond      bool
-	variables IfCtx
+	variables map[string]any
 	done      bool
 }
 
@@ -25,7 +27,7 @@ type thenContext ifContext
 func If(cond bool) *ifContext {
 	return &ifContext{
 		cond:      cond,
-		variables: make(IfCtx),
+		variables: make(map[string]any),
 	}
 }
 
@@ -39,8 +41,8 @@ func If(cond bool) *ifContext {
 //	    return c["err"] != nil
 //	}).Then(...)
 func IfWithStmt(condWithStmt func(IfCtx) bool) *ifContext {
-	ifCtx := ifContext{variables: make(IfCtx)}
-	ifCtx.cond = condWithStmt(ifCtx.variables)
+	ifCtx := ifContext{variables: make(map[string]any)}
+	ifCtx.cond = condWithStmt(IfCtx{Values: ifCtx.variables})
 	return &ifCtx
 }
 
@@ -59,7 +61,7 @@ func IfWithStmt(condWithStmt func(IfCtx) bool) *ifContext {
 func (c *ifContext) Then(fn func(IfCtx)) *thenContext {
 	if !c.done && c.cond {
 		c.done = true
-		fn(c.variables)
+		fn(IfCtx{Values: c.variables})
 	}
 	return (*thenContext)(c)
 }
@@ -67,7 +69,7 @@ func (c *ifContext) Then(fn func(IfCtx)) *thenContext {
 // Else executes the function if the condition is false.
 func (c *thenContext) Else(fn func(IfCtx)) {
 	if !c.done && !c.cond {
-		fn(c.variables)
+		fn(IfCtx{Values: c.variables})
 	}
 }
 
@@ -85,7 +87,7 @@ func (c *thenContext) ElseIf(cond bool) *ifContext {
 // The statement receives an IfCtx for variable sharing.
 func (c *thenContext) ElseIfWithStmt(condWithStmt func(IfCtx) bool) *ifContext {
 	if !c.done {
-		c.cond = condWithStmt(c.variables)
+		c.cond = condWithStmt(IfCtx{Values: c.variables})
 	}
 	return (*ifContext)(c)
 }
@@ -95,7 +97,7 @@ func (c *thenContext) ElseIfWithStmt(condWithStmt func(IfCtx) bool) *ifContext {
 func IfThen(cond bool, fn func()) *thenContext {
 	thenCtx := thenContext{
 		cond:      cond,
-		variables: make(IfCtx),
+		variables: make(map[string]any),
 	}
 	if thenCtx.cond {
 		thenCtx.done = true

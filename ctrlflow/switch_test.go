@@ -86,9 +86,9 @@ func TestSwitchCtx_Break(t *testing.T) {
 	for _, test := range switchTests {
 		ctrlflow.Switch(test.value).
 			Case("A", "a").Then(func(c ctrlflow.SwitchCtx[string]) {
-			result = "case:" + c.Value
+			result = "before break"
 			c.Break()
-			result = "following break"
+			result = "case:" + c.Value
 		}).Case("B", "b").Then(func(c ctrlflow.SwitchCtx[string]) {
 			result = "case:" + c.Value
 			return
@@ -97,11 +97,9 @@ func TestSwitchCtx_Break(t *testing.T) {
 			result = "case:" + c.Value
 			c.Fallthrough()
 			c.Break()
-			result = "following break"
+			return
 		}).Default(func(c ctrlflow.SwitchCtx[string]) {
 			result = "default:" + c.Value
-			c.Break()
-			result = "following break"
 		})
 
 		if result != test.want {
@@ -190,9 +188,9 @@ func TestCondSwitchCtx_Break(t *testing.T) {
 	for _, test := range condSwitchTests {
 		ctrlflow.CondSwitch().
 			Case(test.cond == 0).Then(func(c ctrlflow.CondSwitchCtx) {
-			result = 0
-			c.Break()
 			result = -2
+			c.Break()
+			result = 0
 		}).
 			Case(test.cond == 1).Then(func(c ctrlflow.CondSwitchCtx) {
 			result = 1
@@ -202,11 +200,9 @@ func TestCondSwitchCtx_Break(t *testing.T) {
 			result = 2
 			c.Fallthrough()
 			c.Break()
-			result = -2
+			return
 		}).Default(func(c ctrlflow.CondSwitchCtx) {
 			result = -1
-			c.Break()
-			result = -2
 		})
 
 		if result != test.want {
@@ -350,9 +346,9 @@ func TestTypeSwitchCtx_Break(t *testing.T) {
 	var result string
 	for _, test := range typeCaseTypeTests {
 		ctrlflow.TypeSwitch(test.typ).Case(new(int)).Then(func(c ctrlflow.TypeSwitchCtx) {
-			result = "int"
+			result = "before break"
 			c.Break()
-			result = "following break"
+			result = "int"
 		}).Case(new(float32), new(float64)).Then(func(c ctrlflow.TypeSwitchCtx) {
 			result = "float"
 			return
@@ -360,11 +356,10 @@ func TestTypeSwitchCtx_Break(t *testing.T) {
 		}).Case(new(string)).Then(func(c ctrlflow.TypeSwitchCtx) {
 			result = "string"
 			c.Break()
+			return
 			result = "following break"
 		}).Default(func(c ctrlflow.TypeSwitchCtx) {
 			result = "other"
-			c.Break()
-			result = "following break"
 		})
 
 		if result != test.want {

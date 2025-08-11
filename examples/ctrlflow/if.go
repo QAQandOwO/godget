@@ -103,30 +103,30 @@ func ExampleIfWithStmtThenElse() {
 
 	// first way
 	ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool {
-		c["num"], c["err"] = divide(10, 0)
-		return c["err"] != nil
+		c.Values["num"], c.Values["err"] = divide(10, 0)
+		return c.Values["err"] != nil
 	}).Then(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).Else(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["num"])
+		fmt.Println(c.Values["num"])
 	})
 	// second way
 	ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool {
-		c["num"], c["err"] = divide(10, 0)
-		return c["err"] != nil
+		c.Values["num"], c.Values["err"] = divide(10, 0)
+		return c.Values["err"] != nil
 	}, func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).Else(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["num"])
+		fmt.Println(c.Values["num"])
 	})
 	// third way
 	ctrlflow.IfWithStmtThenElse(func(c ctrlflow.IfCtx) bool {
-		c["num"], c["err"] = divide(10, 0)
-		return c["err"] != nil
+		c.Values["num"], c.Values["err"] = divide(10, 0)
+		return c.Values["err"] != nil
 	}, func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}, func(c ctrlflow.IfCtx) {
-		fmt.Println(c["num"])
+		fmt.Println(c.Values["num"])
 	})
 }
 
@@ -169,31 +169,31 @@ func ExampleIfWithStmtThenElseIfWithStmtThenElse() {
 
 	// first way
 	ctrlflow.IfWithStmt(func(c ctrlflow.IfCtx) bool {
-		c["file"], c["err"] = findFile("./dir")
-		return c["err"] != nil
+		c.Values["file"], c.Values["err"] = findFile("./dir")
+		return c.Values["err"] != nil
 	}).Then(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).ElseIfWithStmt(func(c ctrlflow.IfCtx) bool {
-		c["content"], c["err"] = readFile(c["file"].(*fileInfo))
-		return c["err"] != nil
+		c.Values["content"], c.Values["err"] = readFile(c.Values["file"].(*fileInfo))
+		return c.Values["err"] != nil
 	}).Then(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).Else(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["content"])
+		fmt.Println(c.Values["content"])
 	})
 	// second way
 	ctrlflow.IfWithStmtThen(func(c ctrlflow.IfCtx) bool {
-		c["file"], c["err"] = findFile("./dir")
-		return c["err"] != nil
+		c.Values["file"], c.Values["err"] = findFile("./dir")
+		return c.Values["err"] != nil
 	}, func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).ElseIfWithStmtThen(func(c ctrlflow.IfCtx) bool {
-		c["content"], c["err"] = readFile(c["file"].(*fileInfo))
-		return c["err"] != nil
+		c.Values["content"], c.Values["err"] = readFile(c.Values["file"].(*fileInfo))
+		return c.Values["err"] != nil
 	}, func(c ctrlflow.IfCtx) {
-		fmt.Println(c["err"])
+		fmt.Println(c.Values["err"])
 	}).Else(func(c ctrlflow.IfCtx) {
-		fmt.Println(c["content"])
+		fmt.Println(c.Values["content"])
 	})
 }
 
