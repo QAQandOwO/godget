@@ -46,4 +46,4 @@ func main() {
 
 Click package name to see examples:
 
-- [comparator](https://github.com/QAQandOwO/godget/comparator/comparator_example_test.go): A package for provides a chainable way to create complex comparators.
+- [comparator](https://github.com/QAQandOwO/godget/blob/main/comparator/comparator_example_test.go): A package for provides a chainable way to create complex comparators.
