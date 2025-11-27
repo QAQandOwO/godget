@@ -1,8 +1,6 @@
 Some gadgets written in golang.
 
-## Installation
-
-### Get
+## Get
 
 ```
 go get github.com/QAQandOwO/godget
@@ -29,15 +27,12 @@ import (
 )
 
 func main() {
-	intComparator := comparator.New[int]().
-		ThenComparing(func(a, b int) int { 
-			return a - b 
-		})
+	lenComparator := comparator.New[string](func (a, b string) int { return len(a) - len(b) })
 	
-	if intComparator.Compare(1, 2) < 0 {
-		fmt.Println("1 < 2")
+	if lenComparator.Compare("A", "B") == 0 {
+		fmt.Println(`len("A") == len("B")`)
     } else {
-		fmt.Println("1 >= 2")
+		fmt.Println(`len("A") != len("B")`)
     }
 }
 ```
@@ -47,5 +42,8 @@ func main() {
 Click package name to see examples:
 
 - [comparator](https://github.com/QAQandOwO/godget/blob/main/examples/comparator/comparator_example_test.go): Provide a chainable way to create complex comparators.
+- [enum](https://github.com/QAQandOwO/godget/blob/main/examples/enum/enum_example_test.go): Provide type-safe enumerations for Go with global registry.
 - [json](https://github.com/QAQandOwO/godget/blob/main/examples/json/json_example_test.go): Provide generic wrappers around json.Marshal, json.MarshalIndent and json.Unmarshal functions.
 - [option](https://github.com/QAQandOwO/godget/blob/main/examples/option/option_example_test.go): Provide a generic wrapper around the option pattern.
+
+## [Document](https://pkg.go.dev/github.com/QAQandOwO/godget#section-readme)

@@ -1,5 +1,4 @@
 // Package option provides a generic Option type that explicitly represents the presence or absence of a value.
-
 package option
 
 import (

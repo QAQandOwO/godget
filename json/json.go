@@ -1,5 +1,4 @@
 // Package json provides generic wrappers around [json.Marshal], [json.MarshalIndent] and [json.Unmarshal] functions.
-
 package json
 
 import "encoding/json"
