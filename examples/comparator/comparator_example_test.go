@@ -12,7 +12,7 @@ type product struct {
 	desc  string
 }
 
-func TestComparator_Compare_Example(t *testing.T) {
+func TestComparator_Compare_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -33,7 +33,7 @@ func TestComparator_Compare_Example(t *testing.T) {
 	//	0
 }
 
-func TestComparator_Less_Example(t *testing.T) {
+func TestComparator_Less_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -54,7 +54,7 @@ func TestComparator_Less_Example(t *testing.T) {
 	//	false
 }
 
-func TestComparator_Greater_Example(t *testing.T) {
+func TestComparator_Greater_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -75,7 +75,7 @@ func TestComparator_Greater_Example(t *testing.T) {
 	//	false
 }
 
-func TestComparator_Equal_Example(t *testing.T) {
+func TestComparator_Equal_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -96,7 +96,7 @@ func TestComparator_Equal_Example(t *testing.T) {
 	//	true
 }
 
-func TestComparator_Min_Example(t *testing.T) {
+func TestComparator_Min_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -113,7 +113,7 @@ func TestComparator_Min_Example(t *testing.T) {
 	//	{product1 10 }
 }
 
-func TestComparator_Max_Example(t *testing.T) {
+func TestComparator_Max_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -130,7 +130,7 @@ func TestComparator_Max_Example(t *testing.T) {
 	//	{product2 5 }
 }
 
-func TestComparator_ReverseLast_Example(t *testing.T) {
+func TestComparator_ReverseLast_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -151,7 +151,7 @@ func TestComparator_ReverseLast_Example(t *testing.T) {
 	//	1
 }
 
-func TestComparator_ReverseAll_Example(t *testing.T) {
+func TestComparator_ReverseAll_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -172,7 +172,7 @@ func TestComparator_ReverseAll_Example(t *testing.T) {
 	//	1
 }
 
-func TestComparator_SortSlice_Example(t *testing.T) {
+func TestComparator_SortSlice_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
@@ -195,7 +195,7 @@ func TestComparator_SortSlice_Example(t *testing.T) {
 	//	{product2 5 }
 }
 
-func TestComparator_SliceIsSorted_Example(t *testing.T) {
+func TestComparator_SliceIsSorted_Example(*testing.T) {
 	comparator := comparator.New[product](comparator.By(func(p product) string { return p.name })).
 		ThenComparing(func(p1, p2 product) int { return int(p1.count) - int(p2.count) })
 
