@@ -2,6 +2,7 @@
 package option
 
 import (
+	"encoding"
 	"encoding/json"
 	"fmt"
 )
@@ -89,19 +90,19 @@ func (o Option[T]) Filter(fn func(T) bool) Option[T] {
 }
 
 // Or returns the option if Some, otherwise returns value.
-func (o Option[T]) Or(value Option[T]) Option[T] {
+func (o Option[T]) Or(value T) Option[T] {
 	if o.IsSome() {
 		return o
 	}
-	return value
+	return Some(value)
 }
 
 // OrFunc returns the option if Some, otherwise returns the result of fn.
-func (o Option[T]) OrFunc(fn func() Option[T]) Option[T] {
+func (o Option[T]) OrFunc(fn func() T) Option[T] {
 	if o.IsSome() {
 		return o
 	}
-	return fn()
+	return Some(fn())
 }
 
 // Map applies fn to the contained value if Some, otherwise returns None.
@@ -175,7 +176,21 @@ func (o Option[T]) String() string {
 
 // MarshalText implements the [encoding.TextMarshaler] interface.
 func (o Option[T]) MarshalText() ([]byte, error) {
-	return []byte(o.String()), nil
+	if o.IsNone() {
+		return []byte("None"), nil
+	}
+
+	textMarshaler, ok := any(o.value).(encoding.TextMarshaler)
+	if !ok {
+		return []byte(fmt.Sprintf("Some(%v)", *o.value)), nil
+	}
+
+	text, err := textMarshaler.MarshalText()
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte("Some(" + string(text) + ")"), nil
 }
 
 // MarshalJSON implements the [json.Marshaler] interface.
@@ -188,7 +203,7 @@ func (o Option[T]) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (o *Option[T]) UnmarshalJSON(data []byte) error {
-	if len(data) == 0 || string(data) == "null" {
+	if string(data) == "null" {
 		o.value = nil
 		return nil
 	}

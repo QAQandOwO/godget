@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/QAQandOwO/godget/enum"
-	"testing"
+	"sort"
 )
 
 type Number int
 
 var (
-	Num0     = enum.New[Number]("zero", enum.WithNumber(0))
-	Num1     = enum.New[Number]("one", enum.WithNumber(1))
-	Num2     = enum.New[Number]("two", enum.WithNumber(2))
-	OtherNum = enum.New[Number]("other", enum.WithNumber(0))
+	Num0     = enum.New[Number]("zero", enum.WithNumber(0), enum.WithValue[Number](0))
+	Num1     = enum.New[Number]("one", enum.WithNumber(1), enum.WithValue[Number](1))
+	Num2     = enum.New[Number]("two", enum.WithNumber(2), enum.WithValue[Number](2))
+	OtherNum = enum.New[Number]("other", enum.WithNumber(0), enum.WithValue[Number](0))
 )
 
 type Code struct {
@@ -45,7 +45,7 @@ var (
 		}))
 )
 
-func TestGetEnumByName_Example(*testing.T) {
+func ExampleGetEnumByName() {
 	num0, num0Ok := enum.GetEnumByName[Number]("zero")
 	otherNum, otherNumOk := enum.GetEnumByName[Number]("other")
 	upperOtherNum, upperOtherNumOk := enum.GetEnumByName[Number]("OTHER")
@@ -65,46 +65,54 @@ func TestGetEnumByName_Example(*testing.T) {
 	fmt.Println(notExistedEnum == enum.Enum[struct{}]{}, ok)
 
 	// Output:
-	//	true true
-	//	true true
-	//	false false
-	//	true true
-	//	true true
-	//	true true
-	//	true false
+	// true true
+	// true true
+	// false false
+	// true true
+	// true true
+	// true true
+	// true false
 }
 
-func TestGetEnums_Example(*testing.T) {
+func ExampleGetEnums() {
 	nums, numsOk := enum.GetEnums[Number]()
 	codes, codesOk := enum.GetEnums[Code]()
 	notExistedEnums, ok := enum.GetEnums[struct{}]()
+
+	sort.Slice(nums, func(i, j int) bool { return nums[i].Name() < nums[j].Name() })
+	sort.Slice(codes, func(i, j int) bool { return codes[i].Name() < codes[j].Name() })
+	sort.Slice(notExistedEnums, func(i, j int) bool { return notExistedEnums[i].Name() < notExistedEnums[j].Name() })
 
 	fmt.Println(nums, numsOk)
 	fmt.Println(codes, codesOk)
 	fmt.Println(notExistedEnums, ok)
 
 	// Output:
-	//	[zero one two] true
-	//	[success failure other] true
-	//	[] false
+	// [one other two zero] true
+	// [failure other success] true
+	// [] false
 }
 
-func TestGetEnumNames_Example(*testing.T) {
+func ExampleGetEnumNames() {
 	numNames, numNamesOk := enum.GetEnumNames[Number]()
 	codeNames, codeNamesOk := enum.GetEnumNames[Code]()
 	notExistedNames, ok := enum.GetEnumNames[struct{}]()
+
+	sort.Slice(numNames, func(i, j int) bool { return numNames[i] < numNames[j] })
+	sort.Slice(codeNames, func(i, j int) bool { return codeNames[i] < codeNames[j] })
+	sort.Slice(notExistedNames, func(i, j int) bool { return notExistedNames[i] < notExistedNames[j] })
 
 	fmt.Println(numNames, numNamesOk)
 	fmt.Println(codeNames, codeNamesOk)
 	fmt.Println(notExistedNames, ok)
 
 	// Output:
-	//	[zero one two] true
-	//	[success failure other] true
-	//	[] false
+	// [one other two zero] true
+	// [failure other success] true
+	// [] false
 }
 
-func TestGetEnumCount_Example(*testing.T) {
+func ExampleGetEnumCount() {
 	numCount := enum.GetEnumCount[Number]()
 	codeCount := enum.GetEnumCount[Code]()
 	notExistedCount := enum.GetEnumCount[struct{}]()
@@ -114,12 +122,12 @@ func TestGetEnumCount_Example(*testing.T) {
 	fmt.Println(notExistedCount)
 
 	// Output:
-	//	4
-	//	3
-	//	0
+	// 4
+	// 3
+	// 0
 }
 
-func TestEnum_IsValid_Example(*testing.T) {
+func ExampleEnum_IsValid() {
 	fmt.Println(Num0.IsValid())
 	fmt.Println(enum.Enum[Number]{}.IsValid())
 	fmt.Println(Success.IsValid())
@@ -134,7 +142,7 @@ func TestEnum_IsValid_Example(*testing.T) {
 	// false
 }
 
-func TestEnum_Name_Example(*testing.T) {
+func ExampleEnum_Name() {
 	fmt.Println(Num0.Name())
 	fmt.Println(OtherNum.Name())
 	fmt.Println(Success.Name())
@@ -149,7 +157,7 @@ func TestEnum_Name_Example(*testing.T) {
 	//
 }
 
-func TestEnum_Number_Example(*testing.T) {
+func ExampleEnum_Number() {
 	fmt.Println(Num0.Number())
 	fmt.Println(OtherNum.Number())
 	fmt.Println(Success.Number())
@@ -164,7 +172,7 @@ func TestEnum_Number_Example(*testing.T) {
 	// 0
 }
 
-func TestEnum_Value_Example(*testing.T) {
+func ExampleEnum_Value() {
 	fmt.Println(Num1.Value())
 	fmt.Println(enum.Enum[Number]{}.Value())
 	fmt.Println(Success.Value())
@@ -179,7 +187,7 @@ func TestEnum_Value_Example(*testing.T) {
 	// {}
 }
 
-func TestEnum_Equal_Example(*testing.T) {
+func ExampleEnum_Equal() {
 	fmt.Println(Num0.Equal(Num0))
 	fmt.Println(Num0.Equal(Num1))
 	fmt.Println(Num0.Equal(OtherNum))
@@ -196,7 +204,7 @@ func TestEnum_Equal_Example(*testing.T) {
 	// true
 }
 
-func TestEnum_Compare_Example(*testing.T) {
+func ExampleEnum_Compare() {
 	fmt.Println(Num1.Compare(Num1))
 	fmt.Println(Num1.Compare(Num0))
 	fmt.Println(Num1.Compare(Num2))
@@ -215,13 +223,7 @@ func TestEnum_Compare_Example(*testing.T) {
 	// 0
 }
 
-func TestEnum_Format_Example(*testing.T) {
-	var num enum.Enum[Number]
-	var code enum.Enum[Code]
-	var temp enum.Enum[struct{}]
-
-	// Enum.String
-	fmt.Println("Enum.String:")
+func ExampleEnum_String() {
 	fmt.Println(Num0)
 	fmt.Println(OtherNum)
 	fmt.Println(Success)
@@ -234,9 +236,9 @@ func TestEnum_Format_Example(*testing.T) {
 	// success
 	// other
 	//
+}
 
-	// Enum.MarshalText
-	fmt.Println("Enum.MarshalText:")
+func ExampleEnum_MarshalText() {
 	bytes1, err1 := Num0.MarshalText()
 	bytes2, err2 := OtherNum.MarshalText()
 	bytes3, err3 := Success.MarshalText()
@@ -254,9 +256,13 @@ func TestEnum_Format_Example(*testing.T) {
 	// success <nil>
 	// other <nil>
 	//  invalid enum
+}
 
-	// Enum.UnmarshalText
-	fmt.Println("Enum.UnmarshalText:")
+func ExampleEnum_UnmarshalText() {
+	var num enum.Enum[Number]
+	var code enum.Enum[Code]
+	var temp enum.Enum[struct{}]
+
 	fmt.Println(num.UnmarshalText([]byte("zero")))
 	fmt.Println(num.UnmarshalText([]byte("-")))
 	fmt.Println(code.UnmarshalText([]byte("success")))
@@ -264,19 +270,19 @@ func TestEnum_Format_Example(*testing.T) {
 	fmt.Println(temp.UnmarshalText([]byte("-")))
 
 	// Output:
-	//	<nil>
-	//	Enum[enum_test.Number] with not existed name "-"
-	//	<nil>
-	//	Enum[enum_test.Code] with not existed name "-"
-	//	Enum[struct {}] with not existed name "-"
+	// <nil>
+	// Enum[enum_test.Number] with not existed name "-"
+	// <nil>
+	// Enum[enum_test.Code] with not existed name "-"
+	// Enum[struct {}] with not existed name "-"
+}
 
-	// Enum.MarshalJSON
-	fmt.Println("Enum.MarshalJSON:")
-	bytes1, err1 = json.Marshal(Num0)
-	bytes2, err2 = json.Marshal(OtherNum)
-	bytes3, err3 = json.Marshal(Success)
-	bytes4, err4 = json.Marshal(Other)
-	bytes5, err5 = json.Marshal(enum.Enum[struct{}]{})
+func ExampleEnum_MarshalJSON() {
+	bytes1, err1 := json.Marshal(Num0)
+	bytes2, err2 := json.Marshal(OtherNum)
+	bytes3, err3 := json.Marshal(Success)
+	bytes4, err4 := json.Marshal(Other)
+	bytes5, err5 := json.Marshal(enum.Enum[struct{}]{})
 	fmt.Println(string(bytes1), err1)
 	fmt.Println(string(bytes2), err2)
 	fmt.Println(string(bytes3), err3)
@@ -284,19 +290,24 @@ func TestEnum_Format_Example(*testing.T) {
 	fmt.Println(string(bytes5), err5)
 
 	// Output:
-	// zero <nil>
-	// other <nil>
-	// success <nil>
-	// other <nil>
+	// "zero" <nil>
+	// "other" <nil>
+	// "success" <nil>
+	// "other" <nil>
 	//  json: error calling MarshalJSON for type enum.Enum[struct {}]: invalid enum
+}
 
-	// Enum.UnmarshalJSON
-	fmt.Println("Enum.UnmarshalJSON:")
-	err1 = json.Unmarshal([]byte("\"zero\""), &num)
-	err2 = json.Unmarshal([]byte("\"-\""), &num)
-	err3 = json.Unmarshal([]byte("\"success\""), &code)
-	err4 = json.Unmarshal([]byte("\"-\""), &code)
-	err5 = json.Unmarshal([]byte("\"-\""), &temp)
+func ExampleEnum_UnmarshalJSON() {
+	var num enum.Enum[Number]
+	var code enum.Enum[Code]
+	var temp enum.Enum[struct{}]
+
+	err1 := json.Unmarshal([]byte(`"zero"`), &num)
+	err2 := json.Unmarshal([]byte(`"-"`), &num)
+	err3 := json.Unmarshal([]byte(`"success"`), &code)
+	err4 := json.Unmarshal([]byte(`"-"`), &code)
+	err5 := json.Unmarshal([]byte(`"-"`), &temp)
+
 	fmt.Println(err1)
 	fmt.Println(err2)
 	fmt.Println(err3)
@@ -304,9 +315,9 @@ func TestEnum_Format_Example(*testing.T) {
 	fmt.Println(err5)
 
 	// Output:
-	//	<nil>
-	//	Enum[enum_test.Number] with not existed name "-"
-	//	<nil>
-	//	Enum[enum_test.Code] with not existed name "-"
-	//	Enum[struct {}] with not existed name "-"
+	// <nil>
+	// Enum[enum_test.Number] with not existed name "-"
+	// <nil>
+	// Enum[enum_test.Code] with not existed name "-"
+	// Enum[struct {}] with not existed name "-"
 }

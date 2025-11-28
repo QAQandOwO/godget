@@ -3,7 +3,6 @@ package json
 import (
 	"fmt"
 	"github.com/QAQandOwO/godget/json"
-	"testing"
 )
 
 type person struct {
@@ -11,32 +10,32 @@ type person struct {
 	Age  int    `json:"age"`
 }
 
-func TestMarshal_Example(*testing.T) {
+func ExampleMarshal() {
 	p := person{Name: "Alice", Age: 30}
 	data, err := json.Marshal(p)
 	fmt.Println(string(data))
 	fmt.Println(err)
 
 	// Output:
-	//	{"name":"Alice","age":30}
-	//	<nil>
+	// {"name":"Alice","age":30}
+	// <nil>
 }
 
-func TestMarshalIndent_Example(*testing.T) {
+func ExampleMarshalIndent() {
 	p := person{Name: "Alice", Age: 30}
 	data, err := json.MarshalIndent(p, "", "  ")
 	fmt.Println(string(data))
 	fmt.Println(err)
 
 	// Output:
-	//	{
-	//	  "name": "Alice",
-	//	  "age": 30
-	//	}
-	//	<nil>
+	// {
+	//   "name": "Alice",
+	//   "age": 30
+	// }
+	// <nil>
 }
 
-func TestUnmarshal_Example(*testing.T) {
+func ExampleUnmarshal() {
 	data := []byte(`{"name": "Alice", "age": 30}`)
 	var p person
 	err := json.Unmarshal(data, &p)
@@ -44,17 +43,17 @@ func TestUnmarshal_Example(*testing.T) {
 	fmt.Println(err)
 
 	// Output:
-	//	{Alice 30}
-	//	<nil>
+	// {Alice 30}
+	// <nil>
 }
 
-func TestUnmarshalFor_Example(*testing.T) {
+func ExampleUnmarshalFor() {
 	data := []byte(`{"name": "Alice", "age": 30}`)
 	p, err := json.UnmarshalFor[person](data)
 	fmt.Println(p)
 	fmt.Println(err)
 
 	// Output:
-	//	{Alice 30}
-	//	<nil>
+	// {Alice 30}
+	// <nil>
 }
