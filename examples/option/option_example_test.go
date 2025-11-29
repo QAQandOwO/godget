@@ -1,4 +1,4 @@
-package option
+package option_test
 
 import (
 	"encoding/json"
