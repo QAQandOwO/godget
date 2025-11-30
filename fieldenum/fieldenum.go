@@ -11,14 +11,14 @@ import (
 )
 
 // Option is a function to configure fieldenum.
-type Option = func(config *Config) error
+type Option = func(config *config) error
 
 // WithFuncs registers functions to configure fieldenum.
 // The function name must be unique, otherwise it will panic.
 // Built-in functions convert results to int64, float64, or complex128.
 // It's recommended that custom functions also process and return these three numeric types.
 func WithFuncs(funcs map[string]ExprFunc) Option {
-	return func(conf *Config) error {
+	return func(conf *config) error {
 		for name, fn := range funcs {
 			if _, ok := conf.function(name); ok {
 				return errors.New(`existed function with name "` + name + `"`)
@@ -37,7 +37,7 @@ func WithFuncs(funcs map[string]ExprFunc) Option {
 // it will overflow when converted to int64.
 // It's recommended to use only int64, float64, and complex128 types for values.
 func WithValues(values map[string]any) Option {
-	return func(conf *Config) error {
+	return func(conf *config) error {
 		for name, value := range values {
 			if _, ok := conf.value(name); ok {
 				return errors.New(`existed value with name "` + name + `"`)
@@ -92,13 +92,13 @@ func New[T any](options ...Option) T {
 	return *enums
 }
 
-type Config struct {
+type config struct {
 	funcs  map[string]ExprFunc
 	values map[string]any
 }
 
-func newConfig() *Config { return &Config{make(map[string]ExprFunc), make(map[string]any)} }
-func (conf *Config) function(name string) (ExprFunc, bool) {
+func newConfig() *config { return &config{make(map[string]ExprFunc), make(map[string]any)} }
+func (conf *config) function(name string) (ExprFunc, bool) {
 	fn, ok := builtinFuncs[name]
 	if ok {
 		return fn, true
@@ -106,7 +106,7 @@ func (conf *Config) function(name string) (ExprFunc, bool) {
 	fn, ok = conf.funcs[name]
 	return fn, ok
 }
-func (conf *Config) value(name string) (any, bool) {
+func (conf *config) value(name string) (any, bool) {
 	if name == "iota" {
 		return conf.values["iota"], true
 	}
@@ -186,7 +186,7 @@ func assignStringEnums(v reflect.Value, t reflect.Type) {
 	}
 }
 
-func assignNumberEnums(conf *Config, v reflect.Value, t reflect.Type, kind uint8) error {
+func assignNumberEnums(conf *config, v reflect.Value, t reflect.Type, kind uint8) error {
 	var (
 		fset *token.FileSet
 		tree ast.Node
