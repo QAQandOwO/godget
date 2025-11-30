@@ -17,7 +17,7 @@ func parse(expr string) (*token.FileSet, ast.Expr, error) {
 	return fset, tree, nil
 }
 
-func eval(conf *Config, expr string, fset *token.FileSet, tree ast.Node) (any, error) {
+func eval(conf *config, expr string, fset *token.FileSet, tree ast.Node) (any, error) {
 	v, err := evalNode(conf, tree)
 	if err != nil {
 		return nil, err.setFset(fset).setExpr(expr)
@@ -25,7 +25,7 @@ func eval(conf *Config, expr string, fset *token.FileSet, tree ast.Node) (any, e
 	return v, nil
 }
 
-func evalNode(conf *Config, node ast.Node) (any, *exprError) {
+func evalNode(conf *config, node ast.Node) (any, *exprError) {
 	switch n := node.(type) {
 	case *ast.BasicLit: // 处理字面量
 		return evalBasicLit(n)
@@ -66,7 +66,7 @@ func evalBasicLit(lit *ast.BasicLit) (v any, pErr *exprError) {
 	return
 }
 
-func evalIdent(conf *Config, ident *ast.Ident) (any, *exprError) {
+func evalIdent(conf *config, ident *ast.Ident) (any, *exprError) {
 	v, ok := conf.value(ident.Name)
 	if !ok {
 		err := errors.New(`unsupported identifier "` + ident.Name + `"`)
@@ -75,7 +75,7 @@ func evalIdent(conf *Config, ident *ast.Ident) (any, *exprError) {
 	return v, nil
 }
 
-func evalUnaryExpr(conf *Config, expr *ast.UnaryExpr) (any, *exprError) {
+func evalUnaryExpr(conf *config, expr *ast.UnaryExpr) (any, *exprError) {
 	x, pErr := evalNode(conf, expr.X)
 	if pErr != nil {
 		return nil, pErr
@@ -94,7 +94,7 @@ func evalUnaryExpr(conf *Config, expr *ast.UnaryExpr) (any, *exprError) {
 	return v, nil
 }
 
-func evalBinaryExpr(conf *Config, expr *ast.BinaryExpr) (any, *exprError) {
+func evalBinaryExpr(conf *config, expr *ast.BinaryExpr) (any, *exprError) {
 	x, pErr := evalNode(conf, expr.X)
 	if pErr != nil {
 		return nil, pErr
@@ -117,7 +117,7 @@ func evalBinaryExpr(conf *Config, expr *ast.BinaryExpr) (any, *exprError) {
 	return v, nil
 }
 
-func evalCallExpr(conf *Config, expr *ast.CallExpr) (any, *exprError) {
+func evalCallExpr(conf *config, expr *ast.CallExpr) (any, *exprError) {
 	funcExpr, ok := expr.Fun.(*ast.Ident)
 	if !ok {
 		return "", newExprError().setPos(expr.Pos(), expr.End())

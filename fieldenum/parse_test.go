@@ -30,7 +30,7 @@ func testParse(t *testing.T, i int, test parseTest) {
 			test.values = make(map[string]any)
 		}
 
-		conf := &Config{
+		conf := &config{
 			funcs:  test.funcs,
 			values: test.values,
 		}
