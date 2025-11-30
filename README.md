@@ -1,6 +1,6 @@
 Some gadgets written in golang.
 
-## Get
+## Installation
 
 ```
 go get github.com/QAQandOwO/godget
