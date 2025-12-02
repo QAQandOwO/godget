@@ -30,8 +30,8 @@ func ExampleOption_MarshalText() {
 	fmt.Println(string(text2), err2)
 
 	// Output:
-	// Some(some) <nil>
-	// None <nil>
+	// "some" <nil>
+	// null <nil>
 }
 
 func ExampleOption_MarshalJSON() {
@@ -96,7 +96,7 @@ func ExampleOption_IsNone() {
 	// true
 }
 
-func ExampleOption_Value() {
+func ExampleOption_Get() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
@@ -106,7 +106,7 @@ func ExampleOption_Value() {
 				fmt.Println(r)
 			}
 		}()
-		fmt.Println(o.Value())
+		fmt.Println(o.Get())
 	}
 
 	printOptionValue(o1)
@@ -114,15 +114,15 @@ func ExampleOption_Value() {
 
 	// Output:
 	// some
-	// option: call Option.Value on none value
+	// option: call Option.Get on none value
 }
 
-func ExampleOption_ValueOr() {
+func ExampleOption_GetOr() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	v1 := o1.ValueOr("none")
-	v2 := o2.ValueOr("none")
+	v1 := o1.GetOr("none")
+	v2 := o2.GetOr("none")
 
 	fmt.Println(v1)
 	fmt.Println(v2)
@@ -132,12 +132,12 @@ func ExampleOption_ValueOr() {
 	// none
 }
 
-func ExampleOption_ValueOrFunc() {
+func ExampleOption_GetOrFunc() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	v1 := o1.ValueOrFunc(func() string { return "none" })
-	v2 := o2.ValueOrFunc(func() string { return "none" })
+	v1 := o1.GetOrFunc(func() string { return "none" })
+	v2 := o2.GetOrFunc(func() string { return "none" })
 
 	fmt.Println(v1)
 	fmt.Println(v2)
@@ -147,12 +147,12 @@ func ExampleOption_ValueOrFunc() {
 	// none
 }
 
-func ExampleOption_ValueAndError() {
+func ExampleOption_GetAndErr() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	v1, err1 := o1.ValueAndError(errors.New("error"))
-	v2, err2 := o2.ValueAndError(errors.New("error"))
+	v1, err1 := o1.GetAndErr(errors.New("error"))
+	v2, err2 := o2.GetAndErr(errors.New("error"))
 
 	fmt.Println(v1, err1)
 	fmt.Println(v2, err2)
@@ -239,8 +239,8 @@ func ExampleOption_OrFunc() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	or1 := o1.OrFunc(func() string { return "none" })
-	or2 := o2.OrFunc(func() string { return "none" })
+	or1 := o1.OrFunc(func() (string, bool) { return "none", true })
+	or2 := o2.OrFunc(func() (string, bool) { return "none", true })
 
 	fmt.Println(or1)
 	fmt.Println(or2)
@@ -254,14 +254,17 @@ func ExampleOption_Map() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := o1.Map(func(value string) string { return "v1=" + value })
-	m2 := o2.Map(func(value string) string { return "v2=" + value })
+	m11 := o1.Map(func(value string) (string, bool) { return "v1=" + value, true })
+	m12 := o1.Map(func(value string) (string, bool) { return "", false })
+	m2 := o2.Map(func(value string) (string, bool) { return "v2=" + value, true })
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some(v1=some)
+	// None
 	// None
 }
 
@@ -269,14 +272,17 @@ func ExampleOption_MapOr() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := o1.MapOr(func(value string) string { return "v1=" + value }, "v1=none")
-	m2 := o2.MapOr(func(value string) string { return "v2=" + value }, "v2=none")
+	m11 := o1.MapOr(func(value string) (string, bool) { return "v1=" + value, true }, "v1=none")
+	m12 := o1.MapOr(func(value string) (string, bool) { return "", false }, "v1=none")
+	m2 := o2.MapOr(func(value string) (string, bool) { return "v2=" + value, true }, "v2=none")
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some(v1=some)
+	// None
 	// Some(v2=none)
 }
 
@@ -284,18 +290,23 @@ func ExampleOption_MapOrFunc() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := o1.MapOrFunc(
-		func(value string) string { return "v1=" + value },
-		func() string { return "v1=none" })
+	m11 := o1.MapOrFunc(
+		func(value string) (string, bool) { return "v1=" + value, true },
+		func() (string, bool) { return "v1=none", true })
+	m12 := o1.MapOrFunc(
+		func(value string) (string, bool) { return "", false },
+		func() (string, bool) { return "v1=none", true })
 	m2 := o2.MapOrFunc(
-		func(value string) string { return "v2=" + value },
-		func() string { return "v2=none" })
+		func(value string) (string, bool) { return "v2=" + value, true },
+		func() (string, bool) { return "v2=none", true })
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some(v1=some)
+	// None
 	// Some(v2=none)
 }
 
@@ -303,14 +314,17 @@ func ExampleOption_MapAny() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	ma1 := o1.MapAny(func(value string) any { return []string{value} })
-	ma2 := o2.MapAny(func(value string) any { return []string{value} })
+	ma11 := o1.MapAny(func(value string) (any, bool) { return []string{value}, true })
+	ma12 := o1.MapAny(func(value string) (any, bool) { return nil, false })
+	ma2 := o2.MapAny(func(value string) (any, bool) { return []string{value}, true })
 
-	fmt.Println(ma1)
+	fmt.Println(ma11)
+	fmt.Println(ma12)
 	fmt.Println(ma2)
 
 	// Output:
 	// Some([some])
+	// None
 	// None
 }
 
@@ -318,14 +332,17 @@ func ExampleOption_MapAnyOr() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	ma1 := o1.MapAnyOr(func(value string) any { return []string{value} }, []string{})
-	ma2 := o2.MapAnyOr(func(value string) any { return []string{value} }, []string{})
+	ma11 := o1.MapAnyOr(func(value string) (any, bool) { return []string{value}, true }, []string{})
+	ma12 := o1.MapAnyOr(func(value string) (any, bool) { return nil, false }, []string{})
+	ma2 := o2.MapAnyOr(func(value string) (any, bool) { return []string{value}, true }, []string{})
 
-	fmt.Println(ma1)
+	fmt.Println(ma11)
+	fmt.Println(ma12)
 	fmt.Println(ma2)
 
 	// Output:
 	// Some([some])
+	// None
 	// Some([])
 }
 
@@ -333,18 +350,23 @@ func ExampleOption_MapAnyOrFunc() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	ma1 := o1.MapAnyOrFunc(
-		func(value string) any { return []string{value} },
-		func() any { return []string{} })
+	ma11 := o1.MapAnyOrFunc(
+		func(value string) (any, bool) { return []string{value}, true },
+		func() (any, bool) { return []string{}, true })
+	ma12 := o1.MapAnyOrFunc(
+		func(value string) (any, bool) { return nil, false },
+		func() (any, bool) { return []string{}, true })
 	ma2 := o2.MapAnyOrFunc(
-		func(value string) any { return []string{value} },
-		func() any { return []string{} })
+		func(value string) (any, bool) { return []string{value}, true },
+		func() (any, bool) { return []string{}, true })
 
-	fmt.Println(ma1)
+	fmt.Println(ma11)
+	fmt.Println(ma12)
 	fmt.Println(ma2)
 
 	// Output:
 	// Some([some])
+	// None
 	// Some([])
 }
 
@@ -454,14 +476,17 @@ func ExampleMap() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := option.Map(o1, func(value string) []byte { return []byte(value) })
-	m2 := option.Map(o2, func(value string) []byte { return []byte(value) })
+	m11 := option.Map(o1, func(value string) ([]byte, bool) { return []byte(value), true })
+	m12 := option.Map(o1, func(value string) ([]byte, bool) { return []byte(value), false })
+	m2 := option.Map(o2, func(value string) ([]byte, bool) { return []byte(value), false })
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some([115 111 109 101])
+	// None
 	// None
 }
 
@@ -469,14 +494,17 @@ func ExampleMapOr() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := option.MapOr(o1, func(value string) []byte { return []byte(value) }, []byte{})
-	m2 := option.MapOr(o2, func(value string) []byte { return []byte(value) }, []byte{})
+	m11 := option.MapOr(o1, func(value string) ([]byte, bool) { return []byte(value), true }, []byte{})
+	m12 := option.MapOr(o1, func(value string) ([]byte, bool) { return []byte(value), false }, []byte{})
+	m2 := option.MapOr(o2, func(value string) ([]byte, bool) { return []byte(value), true }, []byte{})
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some([115 111 109 101])
+	// None
 	// Some([])
 }
 
@@ -484,18 +512,23 @@ func ExampleMapOrFunc() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
-	m1 := option.MapOrFunc(o1,
-		func(value string) []byte { return []byte(value) },
-		func() []byte { return []byte{} })
+	m11 := option.MapOrFunc(o1,
+		func(value string) ([]byte, bool) { return []byte(value), true },
+		func() ([]byte, bool) { return []byte{}, true })
+	m12 := option.MapOrFunc(o1,
+		func(value string) ([]byte, bool) { return []byte(value), false },
+		func() ([]byte, bool) { return []byte{}, true })
 	m2 := option.MapOrFunc(o2,
-		func(value string) []byte { return []byte(value) },
-		func() []byte { return []byte{} })
+		func(value string) ([]byte, bool) { return []byte(value), true },
+		func() ([]byte, bool) { return []byte{}, true })
 
-	fmt.Println(m1)
+	fmt.Println(m11)
+	fmt.Println(m12)
 	fmt.Println(m2)
 
 	// Output:
 	// Some([115 111 109 101])
+	// None
 	// Some([])
 }
 

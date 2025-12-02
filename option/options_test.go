@@ -114,7 +114,7 @@ func TestOption_IsNone(t *testing.T) {
 	}
 }
 
-func TestOption_Value(t *testing.T) {
+func TestOption_Get(t *testing.T) {
 	tests := []struct {
 		option   Option[int]
 		want     int
@@ -145,14 +145,14 @@ func TestOption_Value(t *testing.T) {
 					t.Errorf("index %d: not panic", i)
 				}
 			}()
-			if got := test.option.Value(); got != test.want {
+			if got := test.option.Get(); got != test.want {
 				t.Errorf("index %d: get %v, value %v", i, got, test.want)
 			}
 		}()
 	}
 }
 
-func TestOption_ValueOr(t *testing.T) {
+func TestOption_GetOr(t *testing.T) {
 	tests := []struct {
 		option Option[int]
 		or     int
@@ -171,13 +171,13 @@ func TestOption_ValueOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.ValueOr(test.or); got != test.want {
+		if got := test.option.GetOr(test.or); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
 }
 
-func TestOption_ValueOrFunc(t *testing.T) {
+func TestOption_GetOrFunc(t *testing.T) {
 	tests := []struct {
 		option Option[int]
 		or     func() int
@@ -196,13 +196,13 @@ func TestOption_ValueOrFunc(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.ValueOrFunc(test.or); got != test.want {
+		if got := test.option.GetOrFunc(test.or); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
 }
 
-func TestOption_ValueAndError(t *testing.T) {
+func TestOption_GetAndErr(t *testing.T) {
 	e := errors.New("error")
 	tests := []struct {
 		option  Option[int]
@@ -228,7 +228,7 @@ func TestOption_ValueAndError(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got, gotErr := test.option.ValueAndError(test.err)
+		got, gotErr := test.option.GetAndErr(test.err)
 		if got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
@@ -329,28 +329,23 @@ func TestOption_Match(t *testing.T) {
 func TestOption_Or(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		or     Option[int]
+		or     int
 		want   int
 	}{
 		0: {
 			option: Some(1),
-			or:     Some(2),
+			or:     2,
 			want:   1,
 		},
 		1: {
 			option: None[int](),
-			or:     Some(2),
+			or:     2,
 			want:   2,
-		},
-		2: {
-			option: None[int](),
-			or:     None[int](),
-			want:   0,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.Or(test.or).ValueOr(0); got != test.want {
+		if got := test.option.Or(test.or).GetOr(0); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -359,28 +354,28 @@ func TestOption_Or(t *testing.T) {
 func TestOption_OrFunc(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		or     func() Option[int]
+		or     func() (int, bool)
 		want   int
 	}{
 		0: {
 			option: Some(1),
-			or:     func() Option[int] { return Some(2) },
+			or:     func() (int, bool) { return 2, true },
 			want:   1,
 		},
 		1: {
 			option: None[int](),
-			or:     func() Option[int] { return Some(2) },
+			or:     func() (int, bool) { return 2, true },
 			want:   2,
 		},
 		2: {
 			option: None[int](),
-			or:     func() Option[int] { return None[int]() },
+			or:     func() (int, bool) { return 0, false },
 			want:   0,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.OrFunc(test.or).ValueOr(0); got != test.want {
+		if got := test.option.OrFunc(test.or).GetOr(0); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -419,23 +414,23 @@ func TestOption_Filter(t *testing.T) {
 func TestOption_Map(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) int
+		fn     func(int) (int, bool)
 		want   int
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) int { return value + 1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
 			want:   2,
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) int { return value + 1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
 			want:   0,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.Map(test.fn).ValueOr(0); got != test.want {
+		if got := test.option.Map(test.fn).GetOr(0); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -444,26 +439,26 @@ func TestOption_Map(t *testing.T) {
 func TestOption_MapOr(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) int
+		fn     func(int) (int, bool)
 		value  int
 		want   int
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) int { return value + 1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
 			value:  -1,
 			want:   2,
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) int { return value + 1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
 			value:  -1,
 			want:   -1,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapOr(test.fn, test.value).Value(); got != test.want {
+		if got := test.option.MapOr(test.fn, test.value).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -472,25 +467,25 @@ func TestOption_MapOr(t *testing.T) {
 func TestOption_MapOrFunc(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) int
-		fn2    func() int
+		fn     func(int) (int, bool)
+		fn2    func() (int, bool)
 		want   any
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) int { return value + 1 },
-			fn2:    func() int { return -1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
+			fn2:    func() (int, bool) { return -1, true },
 			want:   2,
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) int { return value + 1 },
-			fn2:    func() int { return -1 },
+			fn:     func(value int) (int, bool) { return value + 1, true },
+			fn2:    func() (int, bool) { return -1, true },
 			want:   -1,
 		},
 	}
 	for i, test := range tests {
-		if got := test.option.MapOrFunc(test.fn, test.fn2).Value(); got != test.want {
+		if got := test.option.MapOrFunc(test.fn, test.fn2).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -499,23 +494,23 @@ func TestOption_MapOrFunc(t *testing.T) {
 func TestOption_MapAny(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) any
+		fn     func(int) (any, bool)
 		want   any
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) any { return strconv.Itoa(value) },
+			fn:     func(value int) (any, bool) { return strconv.Itoa(value), true },
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) any { return value + 1 },
+			fn:     func(value int) (any, bool) { return value + 1, true },
 			want:   nil,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapAny(test.fn).ValueOr(nil); got != test.want {
+		if got := test.option.MapAny(test.fn).GetOr(nil); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -524,26 +519,26 @@ func TestOption_MapAny(t *testing.T) {
 func TestOption_MapAnyOr(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) any
+		fn     func(int) (any, bool)
 		value  any
 		want   any
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) any { return strconv.Itoa(value) },
+			fn:     func(value int) (any, bool) { return strconv.Itoa(value), true },
 			value:  1.0,
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) any { return strconv.Itoa(value) },
+			fn:     func(value int) (any, bool) { return strconv.Itoa(value), true },
 			value:  1.0,
 			want:   1.0,
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapAnyOr(test.fn, test.value).ValueOr(nil); got != test.want {
+		if got := test.option.MapAnyOr(test.fn, test.value).GetOr(nil); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -552,26 +547,26 @@ func TestOption_MapAnyOr(t *testing.T) {
 func TestOption_MapAnyOrFunc(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) any
-		fn2    func() any
+		fn     func(int) (any, bool)
+		fn2    func() (any, bool)
 		want   any
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) any { return strconv.Itoa(value) },
-			fn2:    func() any { return "None" },
+			fn:     func(value int) (any, bool) { return strconv.Itoa(value), true },
+			fn2:    func() (any, bool) { return "None", true },
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) any { return strconv.Itoa(value) },
-			fn2:    func() any { return "None" },
+			fn:     func(value int) (any, bool) { return strconv.Itoa(value), true },
+			fn2:    func() (any, bool) { return "None", true },
 			want:   "None",
 		},
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapAnyOrFunc(test.fn, test.fn2).Value(); got != test.want {
+		if got := test.option.MapAnyOrFunc(test.fn, test.fn2).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -596,7 +591,7 @@ func TestOption_FlatMap(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMap(test.fn).ValueOr(0); got != test.want {
+		if got := test.option.FlatMap(test.fn).GetOr(0); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -624,7 +619,7 @@ func TestOption_FlatMapOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapOr(test.fn, test.value).Value(); got != test.want {
+		if got := test.option.FlatMapOr(test.fn, test.value).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -658,7 +653,7 @@ func TestOption_FlatMapOrFunc(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapOrFunc(test.fn, test.fn2).ValueOr(0); got != test.want {
+		if got := test.option.FlatMapOrFunc(test.fn, test.fn2).GetOr(0); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -683,7 +678,7 @@ func TestOption_FlatMapAny(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapAny(test.fn).ValueOr(nil); got != test.want {
+		if got := test.option.FlatMapAny(test.fn).GetOr(nil); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -711,7 +706,7 @@ func TestOption_FlatMapAnyOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapAnyOr(test.fn, test.value).ValueOr(nil); got != test.want {
+		if got := test.option.FlatMapAnyOr(test.fn, test.value).GetOr(nil); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -745,7 +740,7 @@ func TestOption_FlatMapAnyOrFunc(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapAnyOrFunc(test.fn, test.fn2).ValueOr(nil); got != test.want {
+		if got := test.option.FlatMapAnyOrFunc(test.fn, test.fn2).GetOr(nil); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -754,23 +749,23 @@ func TestOption_FlatMapAnyOrFunc(t *testing.T) {
 func TestMap(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) string
+		fn     func(int) (string, bool)
 		want   string
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) string { return strconv.Itoa(value) },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) string { return strconv.Itoa(value) },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
 			want:   "",
 		},
 	}
 
 	for i, test := range tests {
-		if got := Map(test.option, test.fn).ValueOr(""); got != test.want {
+		if got := Map(test.option, test.fn).GetOr(""); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -779,25 +774,25 @@ func TestMap(t *testing.T) {
 func TestMapOr(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) string
+		fn     func(int) (string, bool)
 		value  string
 		want   string
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) string { return strconv.Itoa(value) },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
 			value:  "_",
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) string { return strconv.Itoa(value) },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
 			value:  "_",
 			want:   "_",
 		},
 	}
 	for i, test := range tests {
-		if got := MapOr(test.option, test.fn, test.value).Value(); got != test.want {
+		if got := MapOr(test.option, test.fn, test.value).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -806,25 +801,25 @@ func TestMapOr(t *testing.T) {
 func TestMapOrFunc(t *testing.T) {
 	tests := []struct {
 		option Option[int]
-		fn     func(int) string
-		fn2    func() string
+		fn     func(int) (string, bool)
+		fn2    func() (string, bool)
 		want   string
 	}{
 		0: {
 			option: Some(1),
-			fn:     func(value int) string { return strconv.Itoa(value) },
-			fn2:    func() string { return "_" },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
+			fn2:    func() (string, bool) { return "_", true },
 			want:   "1",
 		},
 		1: {
 			option: None[int](),
-			fn:     func(value int) string { return strconv.Itoa(value) },
-			fn2:    func() string { return "_" },
+			fn:     func(value int) (string, bool) { return strconv.Itoa(value), true },
+			fn2:    func() (string, bool) { return "_", true },
 			want:   "_",
 		},
 	}
 	for i, test := range tests {
-		if got := MapOrFunc(test.option, test.fn, test.fn2).Value(); got != test.want {
+		if got := MapOrFunc(test.option, test.fn, test.fn2).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -849,7 +844,7 @@ func TestFlatMap(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := FlatMap(test.option, test.fn).ValueOr(""); got != test.want {
+		if got := FlatMap(test.option, test.fn).GetOr(""); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -877,7 +872,7 @@ func TestFlatMapOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := FlatMapOr(test.option, test.fn, test.value).Value(); got != test.want {
+		if got := FlatMapOr(test.option, test.fn, test.value).Get(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -911,7 +906,7 @@ func TestFlatMapOrFunc(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := FlatMapOrFunc(test.option, test.fn, test.fn2).ValueOr(""); got != test.want {
+		if got := FlatMapOrFunc(test.option, test.fn, test.fn2).GetOr(""); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}

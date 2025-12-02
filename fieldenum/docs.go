@@ -75,11 +75,11 @@ Writing expressions requires understanding the following concepts:
 The expression system uses three numeric types:
 
 1. int64: Used for integer operations
-   - Values exceeding int64 range are converted to float64
-   - uint/uint64 values > math.MaxInt64 cause overflow
+  - Values exceeding int64 range are converted to float64
+  - uint/uint64 values > math.MaxInt64 cause overflow
 
 2. float64: Used for floating-point operations
-   - No automatic promotion to complex
+  - No automatic promotion to complex
 
 3. complex128: Used for complex operations
 
@@ -239,7 +239,7 @@ Aggregation Functions:
 
 Use [WithValues] to register custom values:
 
-  - Value names must be unique
+  - Get names must be unique
   - Values should be numeric types
   - Values are converted to int64/float64/complex128 during evaluation
 
