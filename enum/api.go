@@ -4,7 +4,10 @@
 package enum
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
+	"fmt"
 )
 
 // Enum wraps a type as an enumeration type.
@@ -96,39 +99,30 @@ func (e Enum[T]) Compare(other Enum[T]) int {
 	}
 }
 
-// String implements the [fmt.Stringer] interface.
+// String implements the fmt.Stringer interface.
 // Returns the name of the enum value. or empty string if invalid.
 func (e Enum[T]) String() string {
 	return e.name
 }
 
-// MarshalText implements the [encoding.TextMarshaler] interface.
-// Returns the enum name, or [optionError] wrapping [InvalidError] if invalid.
-func (e Enum[T]) MarshalText() ([]byte, error) {
-	if !e.IsValid() {
-		return nil, newInvalidError()
+// GoString implements the fmt.GoStringer interface.
+func (e Enum[T]) GoString() string {
+	if e.IsValid() {
+		return fmt.Sprintf("enum.Enum[%T]{}", e.value)
 	}
-	return []byte(e.name), nil
+	return fmt.Sprintf("enum.GetEnumByName[%T](%q)", e.value, e.name)
 }
 
-// UnmarshalText implements the [encoding.TextUnmarshaler] interface.
-// The text should be a saved enum name for type T, returns [optionError] wrapping [NameNotExistedError] if not found.
-func (e *Enum[T]) UnmarshalText(text []byte) error {
-	typ := reflectTypeString[T]()
-	enum, existed := loadEnumerByName(typ, string(text))
-	if !existed {
-		return newNameNotExistedError(typ, string(text))
-	}
+// MarshalText implements the encoding.TextMarshaler interface.
+// Returns the enum name, or [InvalidError] if invalid.
+func (e Enum[T]) MarshalText() ([]byte, error) { return e.MarshalJSON() }
 
-	e.enumConfig = enum.config()
-	e.name = enum.Name()
-	e.number = enum.Number()
-	e.value = enum.valuePtr().(*T)
-	return nil
-}
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+// The text should be a saved enum name for type T, returns [NameNotExistedError] if not found.
+func (e *Enum[T]) UnmarshalText(text []byte) error { return e.UnmarshalJSON(text) }
 
-// MarshalJSON implements the [json.Marshaler] interface.
-// Returns the enum name, or [optionError] wrapping [InvalidError] if invalid.
+// MarshalJSON implements the json.Marshaler interface.
+// Returns the enum name, or [InvalidError] if invalid.
 func (e Enum[T]) MarshalJSON() ([]byte, error) {
 	if !e.IsValid() {
 		return nil, newInvalidError()
@@ -136,8 +130,8 @@ func (e Enum[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.name)
 }
 
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
-// The bytes should contain a saved enum name for type T, returns [optionError] wrapping [NameNotExistedError] if not found.
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// The bytes should contain a saved enum name for type T, returns [NameNotExistedError] if not found.
 func (e *Enum[T]) UnmarshalJSON(bytes []byte) error {
 	var name string
 	if err := json.Unmarshal(bytes, &name); err != nil {
@@ -150,10 +144,38 @@ func (e *Enum[T]) UnmarshalJSON(bytes []byte) error {
 		return newNameNotExistedError(typ, name)
 	}
 
-	e.enumConfig = enum.config()
-	e.name = enum.Name()
-	e.number = enum.Number()
-	e.value = enum.valuePtr().(*T)
+	copyEnum(e, enum)
+	return nil
+}
+
+func (e Enum[T]) MarshalBinary() ([]byte, error) { return e.GobEncode() }
+
+func (e *Enum[T]) UnmarshalBinary(data []byte) error { return e.GobDecode(data) }
+
+func (e Enum[T]) GobEncode() ([]byte, error) {
+	if e.IsValid() {
+		return nil, newInvalidError()
+	}
+
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(e.name); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (e *Enum[T]) GobDecode(data []byte) error {
+	var name string
+	if err := gob.NewDecoder(bytes.NewBuffer(data)).Decode(&name); err != nil {
+		return err
+	}
+
+	enum, ok := GetEnumByName[T](name)
+	if !ok {
+		return newNameNotExistedError(reflectTypeString[T](), name)
+	}
+
+	copyEnum(e, &enum)
 	return nil
 }
 
