@@ -100,13 +100,28 @@ func ExampleOption_Get() {
 	o1 := option.Some("some")
 	o2 := option.None[string]()
 
+	v1, ok1 := o1.Get()
+	v2, ok2 := o2.Get()
+
+	fmt.Println(v1, ok1)
+	fmt.Println(v2, ok2)
+
+	// Output:
+	// some true
+	//  false
+}
+
+func ExampleOption_MustGet() {
+	o1 := option.Some("some")
+	o2 := option.None[string]()
+
 	printOptionValue := func(o option.Option[string]) {
 		defer func() {
 			if r := recover(); r != nil {
 				fmt.Println(r)
 			}
 		}()
-		fmt.Println(o.Get())
+		fmt.Println(o.MustGet())
 	}
 
 	printOptionValue(o1)
@@ -114,7 +129,7 @@ func ExampleOption_Get() {
 
 	// Output:
 	// some
-	// option: call Option.Get on none value
+	// option: call Option.MustGet on none value
 }
 
 func ExampleOption_GetOr() {

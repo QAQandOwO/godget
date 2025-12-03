@@ -20,20 +20,25 @@ type Option[T any] struct {
 
 // IsSome returns true if the option contains a value.
 func (o Option[T]) IsSome() bool {
-	return o.some == true
+	return o.some
 }
 
 // IsNone returns true if the option does not contain a value.
 func (o Option[T]) IsNone() bool {
-	return o.some == false
+	return !o.some
 }
 
-// Get returns the contained value if Some, panics if None.
-func (o Option[T]) Get() T {
+// Get returns the contained value if Some, or a zero value of type T if None.
+func (o *Option[T]) Get() (T, bool) {
+	return o.value, o.some
+}
+
+// MustGet returns the contained value if Some, panics if None.
+func (o Option[T]) MustGet() T {
 	if o.IsSome() {
 		return o.value
 	}
-	panic("option: call Option.Get on none value")
+	panic("option: call Option.MustGet on none value")
 }
 
 // GetOr returns the contained value if Some, or the provided default value if None.

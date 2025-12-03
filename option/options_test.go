@@ -145,7 +145,7 @@ func TestOption_Get(t *testing.T) {
 					t.Errorf("index %d: not panic", i)
 				}
 			}()
-			if got := test.option.Get(); got != test.want {
+			if got := test.option.MustGet(); got != test.want {
 				t.Errorf("index %d: get %v, value %v", i, got, test.want)
 			}
 		}()
@@ -458,7 +458,7 @@ func TestOption_MapOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapOr(test.fn, test.value).Get(); got != test.want {
+		if got := test.option.MapOr(test.fn, test.value).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -485,7 +485,7 @@ func TestOption_MapOrFunc(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		if got := test.option.MapOrFunc(test.fn, test.fn2).Get(); got != test.want {
+		if got := test.option.MapOrFunc(test.fn, test.fn2).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -566,7 +566,7 @@ func TestOption_MapAnyOrFunc(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.MapAnyOrFunc(test.fn, test.fn2).Get(); got != test.want {
+		if got := test.option.MapAnyOrFunc(test.fn, test.fn2).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -619,7 +619,7 @@ func TestOption_FlatMapOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := test.option.FlatMapOr(test.fn, test.value).Get(); got != test.want {
+		if got := test.option.FlatMapOr(test.fn, test.value).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -792,7 +792,7 @@ func TestMapOr(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		if got := MapOr(test.option, test.fn, test.value).Get(); got != test.want {
+		if got := MapOr(test.option, test.fn, test.value).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -819,7 +819,7 @@ func TestMapOrFunc(t *testing.T) {
 		},
 	}
 	for i, test := range tests {
-		if got := MapOrFunc(test.option, test.fn, test.fn2).Get(); got != test.want {
+		if got := MapOrFunc(test.option, test.fn, test.fn2).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
@@ -872,7 +872,7 @@ func TestFlatMapOr(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		if got := FlatMapOr(test.option, test.fn, test.value).Get(); got != test.want {
+		if got := FlatMapOr(test.option, test.fn, test.value).MustGet(); got != test.want {
 			t.Errorf("index %d: get %v, value %v", i, got, test.want)
 		}
 	}
