@@ -203,7 +203,7 @@ func (o Option[T]) MarshalJSON() ([]byte, error) {
 
 func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		o.resetNone()
+		o.reset()
 		return nil
 	}
 
@@ -230,7 +230,7 @@ func (o Option[T]) GobEncode() ([]byte, error) {
 
 func (o *Option[T]) GobDecode(data []byte) error {
 	if len(data) == 0 || data[0] == 0 {
-		o.resetNone()
+		o.reset()
 		return nil
 	}
 
@@ -256,7 +256,7 @@ func (o Option[T]) Value() (driver.Value, error) {
 
 func (o *Option[T]) Scan(src any) error {
 	if src == nil {
-		o.resetNone()
+		o.reset()
 		return nil
 	}
 
@@ -275,16 +275,7 @@ func (o *Option[T]) Scan(src any) error {
 	return nil
 }
 
-func (o *Option[T]) reset(value any, some bool) {
-	if some {
-		o.value = value.(T)
-		o.some = true
-	} else {
-		o.resetNone()
-	}
-}
-
-func (o *Option[T]) resetNone() {
+func (o *Option[T]) reset() {
 	var zero T
 	o.value = zero
 	o.some = false
