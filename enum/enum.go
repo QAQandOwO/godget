@@ -2,6 +2,7 @@ package enum
 
 import (
 	"encoding"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -74,6 +75,10 @@ type enumer interface {
 	encoding.TextUnmarshaler
 	json.Marshaler
 	json.Unmarshaler
+	encoding.BinaryMarshaler
+	encoding.BinaryUnmarshaler
+	gob.GobEncoder
+	gob.GobDecoder
 
 	IsValid() bool
 	Name() string
@@ -133,5 +138,12 @@ func (e *Enum[T]) init() {
 }
 
 func reflectTypeString[T any]() string {
-	return reflect.TypeOf(new(T)).Elem().String()
+	return reflect.TypeOf((*T)(nil)).Elem().String()
+}
+
+func copyEnum[T any](e *Enum[T], dst enumer) {
+	e.enumConfig = dst.config()
+	e.name = dst.Name()
+	e.number = dst.Number()
+	e.value = dst.valuePtr().(*T)
 }

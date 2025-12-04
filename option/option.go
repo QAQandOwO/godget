@@ -2,54 +2,65 @@
 package option
 
 import (
-	"encoding"
+	"bytes"
+	"database/sql"
+	"database/sql/driver"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	_ "unsafe"
 )
 
 // Option represents a container that may or may not contain a value of type T.
 type Option[T any] struct {
-	value *T
+	value T
+	some  bool
 }
 
 // IsSome returns true if the option contains a value.
 func (o Option[T]) IsSome() bool {
-	return o.value != nil
+	return o.some
 }
 
 // IsNone returns true if the option does not contain a value.
 func (o Option[T]) IsNone() bool {
-	return o.value == nil
+	return !o.some
 }
 
-// Value returns the contained value if Some, panics if None.
-func (o Option[T]) Value() T {
+// Get returns the contained value if Some, or a zero value of type T if None.
+func (o *Option[T]) Get() (T, bool) {
+	return o.value, o.some
+}
+
+// MustGet returns the contained value if Some, panics if None.
+func (o Option[T]) MustGet() T {
 	if o.IsSome() {
-		return *o.value
+		return o.value
 	}
-	panic("option: call Option.Value on none value")
+	panic("option: call Option.MustGet on none value")
 }
 
-// ValueOr returns the contained value if Some, or the provided default value if None.
-func (o Option[T]) ValueOr(value T) T {
+// GetOr returns the contained value if Some, or the provided default value if None.
+func (o Option[T]) GetOr(value T) T {
 	if o.IsSome() {
-		return *o.value
+		return o.value
 	}
 	return value
 }
 
-// ValueOrFunc returns the contained value if Some, or the result of calling fn if None.
-func (o Option[T]) ValueOrFunc(fn func() T) T {
+// GetOrFunc returns the contained value if Some, or the result of calling fn if None.
+func (o Option[T]) GetOrFunc(fn func() T) T {
 	if o.IsSome() {
-		return *o.value
+		return o.value
 	}
 	return fn()
 }
 
-// ValueAndError returns the contained value if Some, or the provided error if None.
-func (o Option[T]) ValueAndError(err error) (T, error) {
+// GetAndErr returns the contained value if Some, or the provided error if None.
+func (o Option[T]) GetAndErr(err error) (T, error) {
 	if o.IsSome() {
-		return *o.value, nil
+		return o.value, nil
 	}
 	var zero T
 	return zero, err
@@ -58,7 +69,7 @@ func (o Option[T]) ValueAndError(err error) (T, error) {
 // IfSome calls fn with the contained value if Some.
 func (o Option[T]) IfSome(fn func(T)) Option[T] {
 	if o.IsSome() {
-		fn(*o.value)
+		fn(o.value)
 	}
 	return o
 }
@@ -74,7 +85,7 @@ func (o Option[T]) IfNone(fn func()) Option[T] {
 // Match calls fn1 if Some, fn2 if None.
 func (o Option[T]) Match(fn1 func(T), fn2 func()) Option[T] {
 	if o.IsSome() {
-		fn1(*o.value)
+		fn1(o.value)
 	} else {
 		fn2()
 	}
@@ -83,7 +94,7 @@ func (o Option[T]) Match(fn1 func(T), fn2 func()) Option[T] {
 
 // Filter returns None if the option is None or fn returns false.
 func (o Option[T]) Filter(fn func(T) bool) Option[T] {
-	if o.IsSome() && fn(*o.value) {
+	if o.IsSome() && fn(o.value) {
 		return o
 	}
 	return None[T]()
@@ -98,40 +109,40 @@ func (o Option[T]) Or(value T) Option[T] {
 }
 
 // OrFunc returns the option if Some, otherwise returns the result of fn.
-func (o Option[T]) OrFunc(fn func() T) Option[T] {
+func (o Option[T]) OrFunc(fn func() (T, bool)) Option[T] {
 	if o.IsSome() {
 		return o
 	}
-	return Some(fn())
+	return newOption(fn())
 }
 
 // Map applies fn to the contained value if Some, otherwise returns None.
-func (o Option[T]) Map(fn func(T) T) Option[T] {
+func (o Option[T]) Map(fn func(T) (T, bool)) Option[T] {
 	return Map(o, fn)
 }
 
 // MapOr applies fn to the contained value if Some, otherwise returns value.
-func (o Option[T]) MapOr(fn func(T) T, value T) Option[T] {
+func (o Option[T]) MapOr(fn func(T) (T, bool), value T) Option[T] {
 	return MapOr(o, fn, value)
 }
 
 // MapOrFunc applies fn1 to the contained value if Some, otherwise returns fn2().
-func (o Option[T]) MapOrFunc(fn func(T) T, fn2 func() T) Option[T] {
+func (o Option[T]) MapOrFunc(fn func(T) (T, bool), fn2 func() (T, bool)) Option[T] {
 	return MapOrFunc(o, fn, fn2)
 }
 
 // MapAny applies fn to the contained value if Some and returns Option[any].
-func (o Option[T]) MapAny(fn func(T) any) Option[any] {
+func (o Option[T]) MapAny(fn func(T) (any, bool)) Option[any] {
 	return Map(o, fn)
 }
 
 // MapAnyOr applies fn to the contained value if Some, otherwise returns value.
-func (o Option[T]) MapAnyOr(fn func(T) any, value any) Option[any] {
+func (o Option[T]) MapAnyOr(fn func(T) (any, bool), value any) Option[any] {
 	return MapOr(o, fn, value)
 }
 
 // MapAnyOrFunc applies fn1 to the contained value if Some, otherwise returns fn2().
-func (o Option[T]) MapAnyOrFunc(fn func(T) any, fn2 func() any) Option[any] {
+func (o Option[T]) MapAnyOrFunc(fn func(T) (any, bool), fn2 func() (any, bool)) Option[any] {
 	return MapOrFunc(o, fn, fn2)
 }
 
@@ -171,29 +182,23 @@ func (o Option[T]) String() string {
 	if o.IsNone() {
 		return "None"
 	}
-	return fmt.Sprintf("Some(%v)", *o.value)
+	return fmt.Sprintf("Some(%v)", o.value)
 }
 
-// MarshalText implements the [encoding.TextMarshaler] interface.
-func (o Option[T]) MarshalText() ([]byte, error) {
+func (o Option[T]) GoString() string {
 	if o.IsNone() {
-		return []byte("None"), nil
+		return fmt.Sprintf("option.None[%T]()", o.value)
 	}
-
-	textMarshaler, ok := any(o.value).(encoding.TextMarshaler)
-	if !ok {
-		return []byte(fmt.Sprintf("Some(%v)", *o.value)), nil
-	}
-
-	text, err := textMarshaler.MarshalText()
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte("Some(" + string(text) + ")"), nil
+	return fmt.Sprintf("option.Some[%T](%#v)", o.value, o.value)
 }
 
-// MarshalJSON implements the [json.Marshaler] interface.
+func (o *Option[T]) IsZero() bool {
+	if o.IsNone() {
+		return true
+	}
+	return reflect.ValueOf(&o.value).Elem().IsZero()
+}
+
 func (o Option[T]) MarshalJSON() ([]byte, error) {
 	if o.IsNone() {
 		return []byte("null"), nil
@@ -201,61 +206,130 @@ func (o Option[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(o.value)
 }
 
-// UnmarshalJSON implements the [json.Unmarshaler] interface.
 func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		o.value = nil
+		o.reset()
 		return nil
 	}
 
-	var value T
-	if err := json.Unmarshal(data, &value); err != nil {
+	if err := json.Unmarshal(data, &o.value); err != nil {
 		return err
 	}
-	o.value = &value
+
+	o.some = true
 	return nil
+}
+
+func (o Option[T]) GobEncode() ([]byte, error) {
+	if o.IsNone() {
+		return []byte{0}, nil
+	}
+
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(o.value); err != nil {
+		return nil, err
+	}
+
+	return append([]byte{1}, buf.Bytes()...), nil
+}
+
+func (o *Option[T]) GobDecode(data []byte) error {
+	if len(data) == 0 || data[0] == 0 {
+		o.reset()
+		return nil
+	}
+
+	if err := gob.NewDecoder(bytes.NewBuffer(data[1:])).
+		Decode(&o.value); err != nil {
+		return err
+	}
+	o.some = true
+	return nil
+}
+
+func (o Option[T]) MarshalText() ([]byte, error)       { return o.MarshalJSON() }
+func (o *Option[T]) UnmarshalText(data []byte) error   { return o.UnmarshalJSON(data) }
+func (o Option[T]) MarshalBinary() ([]byte, error)     { return o.GobEncode() }
+func (o *Option[T]) UnmarshalBinary(data []byte) error { return o.GobDecode(data) }
+
+func (o Option[T]) Value() (driver.Value, error) {
+	if o.IsNone() {
+		return nil, nil
+	}
+	return driver.DefaultParameterConverter.ConvertValue(o.value)
+}
+
+func (o *Option[T]) Scan(src any) error {
+	if src == nil {
+		o.reset()
+		return nil
+	}
+
+	if scanner, ok := any(&o.value).(sql.Scanner); ok {
+		if err := scanner.Scan(src); err != nil {
+			return err
+		}
+		o.some = true
+		return nil
+	}
+
+	if err := convertAssign(&o.value, src); err != nil {
+		return err
+	}
+	o.some = true
+	return nil
+}
+
+func (o *Option[T]) reset() {
+	var zero T
+	o.value = zero
+	o.some = false
+	return
 }
 
 // Some returns an Option containing the value.
 func Some[T any](value T) Option[T] {
 	return Option[T]{
-		value: &value,
+		value: value,
+		some:  true,
 	}
 }
 
 // None returns an empty Option.
 func None[T any]() Option[T] {
-	return Option[T]{}
+	return Option[T]{
+		some: false,
+	}
 }
 
 // Map applies fn to the value in opt if Some, otherwise returns None[U].
-func Map[T, U any](opt Option[T], fn func(T) U) Option[U] {
+func Map[T, U any](opt Option[T], fn func(T) (U, bool)) Option[U] {
 	if opt.IsSome() {
-		return Some(fn(*opt.value))
+		return newOption(fn(opt.value))
 	}
 	return None[U]()
 }
 
 // MapOr applies fn to the value in opt if Some, otherwise returns value.
-func MapOr[T, U any](opt Option[T], fn func(T) U, value U) Option[U] {
+func MapOr[T, U any](opt Option[T], fn func(T) (U, bool), value U) Option[U] {
 	if opt.IsSome() {
-		return Some(fn(*opt.value))
+		return newOption(fn(opt.value))
 	}
 	return Some(value)
 }
 
 // MapOrFunc applies fn1 to the value in opt if Some, otherwise returns fn2().
-func MapOrFunc[T, U any](opt Option[T], fn1 func(T) U, fn2 func() U) Option[U] {
+func MapOrFunc[T, U any](opt Option[T], fn1 func(T) (U, bool), fn2 func() (U, bool)) Option[U] {
 	if opt.IsSome() {
-		return Some(fn1(*opt.value))
+		return newOption(fn1(opt.value))
 	}
-	return Some(fn2())
+	return newOption(fn2())
 }
 
 // FlatMap applies fn to the value in opt if Some, otherwise returns None[U].
 func FlatMap[T, U any](opt Option[T], fn func(T) Option[U]) Option[U] {
 	if opt.IsSome() {
-		return fn(*opt.value)
+		return fn(opt.value)
 	}
 	return None[U]()
 }
@@ -263,7 +337,7 @@ func FlatMap[T, U any](opt Option[T], fn func(T) Option[U]) Option[U] {
 // FlatMapOr applies fn to the value in opt if Some, otherwise returns value.
 func FlatMapOr[T, U any](opt Option[T], fn func(T) Option[U], value Option[U]) Option[U] {
 	if opt.IsSome() {
-		return fn(*opt.value)
+		return fn(opt.value)
 	}
 	return value
 }
@@ -271,7 +345,17 @@ func FlatMapOr[T, U any](opt Option[T], fn func(T) Option[U], value Option[U]) O
 // FlatMapOrFunc applies fn1 to the value in opt if Some, otherwise returns fn2().
 func FlatMapOrFunc[T, U any](opt Option[T], fn1 func(T) Option[U], fn2 func() Option[U]) Option[U] {
 	if opt.IsSome() {
-		return fn1(*opt.value)
+		return fn1(opt.value)
 	}
 	return fn2()
 }
+
+func newOption[T any](v T, ok bool) Option[T] {
+	if ok {
+		return Some(v)
+	}
+	return None[T]()
+}
+
+//go:linkname convertAssign database/sql.convertAssign
+func convertAssign(dest, src any) error

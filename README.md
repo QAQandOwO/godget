@@ -1,3 +1,5 @@
+# godget
+
 Some gadgets written in golang.
 
 ## Installation
@@ -13,8 +15,6 @@ Select the package you want to use and import it.
 ```go
 import "github.com/QAQandOwO/godget/<package>"
 ```
-
-### Code
 
 Here is an example of using the comparator package.
 

@@ -75,36 +75,36 @@ Writing expressions requires understanding the following concepts:
 The expression system uses three numeric types:
 
 1. int64: Used for integer operations
-   - Values exceeding int64 range are converted to float64
-   - uint/uint64 values > math.MaxInt64 cause overflow
+  - Values exceeding int64 range are converted to float64
+  - uint/uint64 values > math.MaxInt64 cause overflow
 
 2. float64: Used for floating-point operations
-   - No automatic promotion to complex
+  - No automatic promotion to complex
 
 3. complex128: Used for complex operations
 
 # Literals
 
-- Integers: 123, 0xFF, 0b10101, 0123
-- Floats: 123.456, .123, 1.23e10, 1.23E10
-- Complex: 123.456i, .123i, 1.23e10i, 1.23E10i
+  - Integers: 123, 0xFF, 0b10101, 0123
+  - Floats: 123.456, .123, 1.23e10, 1.23E10
+  - Complex: 123.456i, .123i, 1.23e10i, 1.23E10i
 
 # Built-in Constants
 
-- i = 0i
-- e = math.E
-- pi|Pi = math.Pi
-- phi|Phi = math.Phi
-- nan|NaN = math.NaN()
-- inf|Inf = math.Inf(1)
-- iota = current field index (int64)
+  - i = 0i
+  - e = math.E
+  - pi|Pi = math.Pi
+  - phi|Phi = math.Phi
+  - nan|NaN = math.NaN()
+  - inf|Inf = math.Inf(1)
+  - iota = current field index (int64)
 
 # Operators
 
 See package documentation for detailed operator tables covering:
-- Unary: +, -, ^
-- Binary: +, -, *, /, %, &, |, ^, <<, >>, &^
-- Type promotion and overflow handling rules
+  - Unary: +, -, ^
+  - Binary: +, -, *, /, %, &, |, ^, <<, >>, &^
+  - Type promotion and overflow handling rules
 
 Unary Operators:
 
@@ -160,10 +160,10 @@ Binary Operators:
 
 # Built-in Functions
 
-- Type conversion: int(), float(), complex(), real(), imag()
-- Math: abs(), sqrt(), pow(), exp(), log(), log10()
-- Trigonometry: sin(), cos(), tan(), asin(), acos(), atan(), sinh(), cosh(), tanh(), asinh(), acosh(), atanh()
-- Aggregation: max(), min()
+  - Type conversion: int(), float(), complex(), real(), imag()
+  - Math: abs(), sqrt(), pow(), exp(), log(), log10()
+  - Trigonometry: sin(), cos(), tan(), asin(), acos(), atan(), sinh(), cosh(), tanh(), asinh(), acosh(), atanh()
+  - Aggregation: max(), min()
 
 Type Conversion Functions:
 
@@ -239,7 +239,7 @@ Aggregation Functions:
 
 Use [WithValues] to register custom values:
 
-  - Value names must be unique
+  - Get names must be unique
   - Values should be numeric types
   - Values are converted to int64/float64/complex128 during evaluation
 
